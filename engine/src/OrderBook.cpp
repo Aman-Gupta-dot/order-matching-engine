@@ -65,7 +65,7 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
         }
         if(o.quantity>0)
         {
-            sellBook[o.price].push(o);
+            buyBook[o.price].push(o);
         }
     }
     else if(o.side==BuyOrSell::SELL)
@@ -120,7 +120,7 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
         }
         if(o.quantity>0)
         {
-            buyBook[o.price].push(o);
+            sellBook[o.price].push(o);
         }
 
 

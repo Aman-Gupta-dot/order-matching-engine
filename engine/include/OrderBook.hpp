@@ -24,10 +24,8 @@ class OrderBook{
         int nextTradeId=1;//trade matches from this orderBook only
 
     public:
-        OrderBook(const string stockName)
-        {
-            this->stockName=stockName;
-        }
+        OrderBook( string stockName);
+        
 
         vector<Trade> placeOrder(Order o);//to place order o in this Orderbook if matches then return vector of trades otherwise empty set
 
