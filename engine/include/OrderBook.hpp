@@ -19,7 +19,7 @@ class OrderBook{
         
         map<int,queue<Order> >sellBook;//in ascending order by default
     
-        vector<Trade>trades;//we need a vector as placeOrder can return multiple trades
+        vector<Trade>trades;//store all trades done till now in order
         
         int nextTradeId=1;//trade matches from this orderBook only
 
@@ -29,7 +29,7 @@ class OrderBook{
             this->stockName=stockName;
         }
 
-        vector<Trade> placeOrder(Order o);//to place order o in this Orderbook if matches then return vector of traedes otherwise empty set
+        vector<Trade> placeOrder(Order o);//to place order o in this Orderbook if matches then return vector of trades otherwise empty set
 
         void showOrderBook()const;//shows all pending Orders
         void showTrades()const;//show trades done till now
