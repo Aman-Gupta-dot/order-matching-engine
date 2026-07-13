@@ -26,7 +26,24 @@ void callMenu(OrderBook &orderBook,int &buyid,int &sellid,int &timestamp)
                 if(choice2==1)
                 {
                     system("cls");
+                    int orderTypeInNumberAsChoice;
+                    cout<<"press 1 for Limit Order ,2 For Market Order\n";
+                    cin>>orderTypeInNumberAsChoice;
+                    cout<<endl;
+
                     Order order;
+                    if(orderTypeInNumberAsChoice==1)
+                    {
+                        order.type=OrderType::LIMIT;
+                    }
+                    else if(orderTypeInNumberAsChoice==2)
+                    {
+                        order.type=OrderType::MARKET;
+                    }
+                    else{
+                        //default
+                        order.type=OrderType::LIMIT;
+                    }
                     order.orderId=++buyid;
                     order.timeStamp=++timestamp;
                     order.stockName=orderBook.getStockName();
@@ -35,16 +52,37 @@ void callMenu(OrderBook &orderBook,int &buyid,int &sellid,int &timestamp)
                     cin>>order.quantity;
                     cout<<endl;
 
-                    cout<<"plz enter your atmost buying price: ";
-                    cin>>order.price;
-                    cout<<endl;
+                    
+                    if(orderTypeInNumberAsChoice==1)
+                    {
+                        cout<<"plz enter your atmost buying price: ";
+                        cin>>order.price;
+                        cout<<endl;
+                    }
 
                     orderBook.placeOrder(order);
                 }
                 else if(choice2==2)
                 {
                     system("cls");
+                    int orderTypeInNumberAsChoice;
+                    cout<<"press 1 for Limit Order ,2 For Market Order\n";
+                    cin>>orderTypeInNumberAsChoice;
+                    cout<<endl;
+                    
                     Order order;
+                    if(orderTypeInNumberAsChoice==1)
+                    {
+                        order.type=OrderType::LIMIT;
+                    }
+                    else if(orderTypeInNumberAsChoice==2)
+                    {
+                        order.type=OrderType::MARKET;
+                    }
+                    else{
+                        //default
+                        order.type=OrderType::LIMIT;
+                    }
                     order.orderId=++sellid;
                     order.timeStamp=++timestamp;
                     order.stockName=orderBook.getStockName();
@@ -53,9 +91,12 @@ void callMenu(OrderBook &orderBook,int &buyid,int &sellid,int &timestamp)
                     cin>>order.quantity;
                     cout<<endl;
 
-                    cout<<"plz enter your atleast selling price: ";
-                    cin>>order.price;
-                    cout<<endl;
+                    if(orderTypeInNumberAsChoice==1)
+                    {
+                        cout<<"plz enter your atleast selling price: ";
+                        cin>>order.price;
+                        cout<<endl;
+                    }
                     
                     orderBook.placeOrder(order);
 

@@ -66,8 +66,8 @@ int main()
 
     vector<pair<int,string>>choiceAndName{{1,"DairyMilk"},{2,"5-star"},{3,"Ferrero Rocher"},{4,"Kinder Joy"}};
 
-    int buyOrderId=100;
-    int sellOrderId=200;
+    int buyOrderId=1000;
+    int sellOrderId=2000;
     int overalltimestamp=0;
     OrderBook orderBookdm("Dairy Milk");
     OrderBook orderBook5s("5-star");
