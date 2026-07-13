@@ -1,5 +1,6 @@
 #include "../include/OrderBook.hpp"
 
+
 #include<iostream>
 #include<algorithm>
 #include<vector>
@@ -16,17 +17,16 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
     if(o.side==BuyOrSell::BUY)
     {
         //*add entry to buyBook
-        while(o.quantity>0 && !sellBook.empty())//try to mach maximum sell orders thru buy orders
+        while(o.quantity>0 && !sellBook.empty())//try to match maximum sell orders thru buy orders
         {
             auto bestSell=sellBook.begin();//it give a pointer to iterator over the map start as ascending so best sell is at start only
             if(bestSell->first<=o.price)
             {
                 //trade will happen
                 //at what trade price
-                queue<Order>&sellQueue=bestSell->second;
+                CustomLinkedQueue &sellQueue=bestSell->second;
                 //this queue has selling orders aligned in this queue for this particular price
-                Order &oldest=sellQueue.front();//to make changes to original q we used &
-
+                Order &oldest=sellQueue.start();//to make changes to original q we used &
                 int tradingQuantity=min(oldest.quantity,o.quantity);
 
                 Trade trade;
@@ -50,10 +50,11 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
 
                 if(oldest.quantity==0)
                 {
-                    sellQueue.pop();
+                    sellQueue.popfront();
+                    idToOrderMappingForSell.erase(oldest.orderId);
                 }
 
-                if(sellQueue.empty())
+                if(sellQueue.isEmpty())
                 {
                     sellBook.erase(bestSell);
                     //remove this key value pair
@@ -65,7 +66,9 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
         }
         if(o.quantity>0)
         {
-            buyBook[o.price].push(o);
+            buyBook[o.price].pushback(o);
+            idToOrderMappingForBuy[o.orderId]=o.price;
+            
         }
     }
     else if(o.side==BuyOrSell::SELL)
@@ -78,9 +81,9 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
             {
 
                 //match the order
-                queue<Order>&buyQueue=bestBuy->second;
+                CustomLinkedQueue &buyQueue=bestBuy->second;
 
-                Order &oldestBuy=buyQueue.front();
+                Order &oldestBuy=buyQueue.start();
 
                 Trade trade;
                 trade.buyOrderId=oldestBuy.orderId;
@@ -105,10 +108,11 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
 
                 if(oldestBuy.quantity==0)
                 {
-                    buyQueue.pop();
+                    buyQueue.popfront();
+                    idToOrderMappingForBuy.erase(oldestBuy.orderId);
                 }
 
-                if(buyQueue.empty())
+                if(buyQueue.isEmpty())
                 {
                     buyBook.erase(bestBuy);
                 }
@@ -120,7 +124,9 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
         }
         if(o.quantity>0)
         {
-            sellBook[o.price].push(o);
+            sellBook[o.price].pushback(o);
+            idToOrderMappingForSell[o.orderId]=o.price;
+            
         }
 
 
@@ -128,18 +134,73 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
     return executedTrades;//to return vector of trades
 }
 
+void OrderBook::deleteOrder(int &oid,BuyOrSell side)
+{
+    if(side==BuyOrSell::BUY)
+    {
+        if(idToOrderMappingForBuy.count(oid)==0)
+        {
+            cout<<"No such id in buy order book currently\n";
+            return;
+        }
+        
+       
+       double toBeDeletedprice=idToOrderMappingForBuy[oid];
+       buyBook[toBeDeletedprice].pop(oid);
+       if(buyBook[toBeDeletedprice].isEmpty())
+       {
+        buyBook.erase(toBeDeletedprice);
+       }
+
+       idToOrderMappingForBuy.erase(oid);    
+    }
+    else
+    {
+         if(idToOrderMappingForSell.count(oid)==0)
+        {
+            cout<<"No such id in sell order book currently\n";
+            return;
+        }
+        
+       
+       double toBeDeletedprice=idToOrderMappingForSell[oid];
+       sellBook[toBeDeletedprice].pop(oid);
+       if(sellBook[toBeDeletedprice].isEmpty())
+       {
+        sellBook.erase(toBeDeletedprice);
+       }
+       idToOrderMappingForSell.erase(oid);    
+    }
+}
+
 
 //now display current orderBook
 //just display all pending orders(both buy sise and sell side)
 void OrderBook::showOrderBook() const
 {
-    cout<<"================================ORDER-BOOK-"<<stockName<<"================================";
+    cout<<"==============================================================================================\n";
+    cout<<"                                  ORDER-BOOK-"<<stockName<<"                                  ";
+    cout<<"==============================================================================================\n";
     cout<<"\nBuy Orders:\n";
 
+    cout<<"----------------------------------------------------------------------------------------------\n";
     for(auto &priceLevel:buyBook)//&used so copy not created again and again costing us memory
     {
-        cout<<"Price : "<<priceLevel.first
-        <<" | Waiting Orders at this price : "<<priceLevel.second.size()<<endl;
+        cout<<"Price : "<<priceLevel.first<<endl;
+        cout<<" | Waiting Orders at this price : "<<priceLevel.second.getSize()<<endl;
+        
+        cout<<"OrderId"<<"  "<<"Price"<<"  "<<"quantity"<<endl;
+        cout<<"----------------------------------------------------------------------------------------------\n";
+        Node*temp=priceLevel.second.getFront();//temp to print this customQueue
+        while(temp!=nullptr)
+        {
+            cout<<temp->order.orderId<<"      "<<temp->order.price<<"      "<<temp->order.quantity<<endl;
+            temp=temp->next;
+        }
+    
+
+    cout<<"----------------------------------------------------------------------------------------------\n";
+
     }
 
     cout<<"\nSell Orders:\n";
@@ -147,7 +208,19 @@ void OrderBook::showOrderBook() const
     for(auto &priceLevel:sellBook)
     {
         cout<<"Price : "<<priceLevel.first
-        <<" | Waiting Orders at this price : "<<priceLevel.second.size()<<endl;
+        <<" | Waiting Orders at this price : "<<priceLevel.second.getSize()<<endl;
+        
+        cout<<"OrderId"<<"  "<<"Price"<<"  "<<"quantity"<<endl;
+    cout<<"----------------------------------------------------------------------------------------------\n";
+        Node*temp=priceLevel.second.getFront();//temp to print this customQueue
+        while(temp!=nullptr)
+        {
+            cout<<temp->order.orderId<<"      "<<temp->order.price<<"      "<<temp->order.quantity<<endl;
+            temp=temp->next;
+        }
+    cout<<"----------------------------------------------------------------------------------------------\n";
+
+
     }
 }
 
@@ -167,6 +240,7 @@ void OrderBook::showTrades() const{
         
     }
 }
+
 string OrderBook::getStockName()const{
     return stockName;
 }

@@ -15,8 +15,9 @@ void callMenu(OrderBook &orderBook,int &buyid,int &sellid,int &timestamp)
                 cout<<"2.Place sell order : "<<endl;
                 cout<<"3.View order book : "<<endl;
                 cout<<"4.View Trade History : "<<endl;
+                cout<<"5.Delete ur order if not executed(with orderid if it exists)";
 
-                cout<<"plz enter 5 to go back"<<endl;
+                cout<<"plz enter 6 to go back"<<endl;
 
                 cout<<"Plz enter your choice : ";
                 cin>>choice2;
@@ -70,6 +71,31 @@ void callMenu(OrderBook &orderBook,int &buyid,int &sellid,int &timestamp)
                     orderBook.showTrades();
                 }
                 else if(choice2==5)
+                {
+                    
+                    cout<<"what kind of order you want to delete:(Press 1 for buy),(2 for sell) : ";
+                    int num;
+                    cin>>num;
+                    cout<<endl;
+                    int oid;
+                    cout<<"enter order id to delete : ";
+                    cin>>oid;
+                    cout<<endl;
+                    if(num==1)
+                    {
+                        //delete buy order
+                        orderBook.deleteOrder(oid,BuyOrSell::BUY);
+                    }
+                    else if(num==2)
+                    {
+                        orderBook.deleteOrder(oid,BuyOrSell::SELL);
+                    }
+                    else{
+                        cout<<"Invalid choice\n";
+                    }
+
+                }
+                else if(choice2==6)
                 {
                     system("cls");
                     break;
