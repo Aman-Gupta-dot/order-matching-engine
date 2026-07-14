@@ -17,7 +17,7 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
    
         if(o.side==BuyOrSell::BUY)
             {
-                if(o.type==OrderType::LIMIT)
+                if(o.type==OrderType::LIMIT || o.type==OrderType::IOC)
                 {
                         //*add entry to buyBook
                     while(o.quantity>0 && !sellBook.empty())//try to match maximum sell orders thru buy orders
@@ -50,11 +50,14 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                             //update changes to quantity
                             o.quantity-=tradingQuantity;//can't become -ve as min(o,oldest)
                             oldest.quantity-=tradingQuantity;
+                            totalSellQuantities-=tradingQuantity;//For FOK orders
 
                             if(oldest.quantity==0)
                             {
+                                idToOrderMappingForSell.erase(oldest.orderId);//these 2 lines in this order only
+                                //otherwise if reversed pop will destroy &oldest referenece so can dangle
                                 sellQueue.popfront();
-                                idToOrderMappingForSell.erase(oldest.orderId);
+                                
                             }
 
                             if(sellQueue.isEmpty())
@@ -67,10 +70,11 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         }
                         else break;//buyer is not willing to pay that much amount
                     }
-                    if(o.quantity>0)
+                    if(o.quantity>0 && o.type==OrderType::LIMIT)
                     {
                         buyBook[o.price].pushback(o);
                         idToOrderMappingForBuy[o.orderId]=o.price;
+                        totalBuyQuantities+=o.quantity;//For FOK orders
                         
                     }
 
@@ -106,11 +110,13 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         //now update quantities
                         o.quantity-=tradingQuantity;
                         oldest.quantity-=tradingQuantity;
+                        totalSellQuantities-=tradingQuantity;//For FOK orders
 
                         if(oldest.quantity==0)
                         {
+                            idToOrderMappingForSell.erase(oldest.orderId);
                             sellQueue.popfront();
-                            idToOrderMappingForBuy.erase(oldest.orderId);
+                            
                         }
 
                         if(sellQueue.isEmpty())
@@ -128,18 +134,92 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         cout<<"Unfilled quantities : "<<o.quantity<<"\n";
 
                         cout<<"Reason:\n";
-                        cout<<"No more sell orders in sellBook so remaining quantities are cancelled\n";
+                        cout<<"No more sell orders in sellBook, so remaining quantities are cancelled\n";
                         cout<<"----------------------------------\n";
 
 
                     }
+                }
+                else if(o.type==OrderType::FOK)
+                {
+                    //Fill or kill
+                   if(o.quantity>totalSellQuantities)
+                   {
+                        cout<<"Order cancelled\n";
+                        cout<<"Reason:Insufficient sell quantities\n";
+                        return {};
+                   }
+                   else{
+                    //check if all required quantities have price less than equal to as required for this order
+                    int qtyTemp=0;
+                    for(auto iter:sellBook)
+                    {
+                        if(qtyTemp>=o.quantity)
+                        {
+                            break;
+                        }
+                        if(iter.first>o.price)//cancel order as till now not required qts matched and sell price increased
+                        {
+                            //kill order
+                            cout<<"Order cancelled\n";
+                            cout<<"Reason:selling price more than buy price\n";
+                            return {};
+                        }
+                        qtyTemp+=iter.second.getTotalQuantity();
+                        
+                    }
+                    //if came till here, this means order shd be filled for sure
+                    while(o.quantity>0)//2nd cond not written as we know this will pass anyway
+                    {
+                        auto bestSell=sellBook.begin();//bestbuy will be at top of buyBook
+                        CustomLinkedQueue &sellQueue=bestSell->second;
+                        Order &oldest=sellQueue.start();
+                        //match order
+                        Trade trade;
+                        trade.buyOrderId=o.orderId;
+                        trade.sellOrderId=oldest.orderId;
+                        
+                        int tradingQuantity=min(o.quantity,oldest.quantity);
+                        trade.quantity=tradingQuantity;
+                        trade.time_stamp=o.timeStamp;
+                        trade.tradeId=nextTradeId;
+                        nextTradeId++;
+
+                        trade.tradePrice=oldest.price;//resting order price
+                        
+                        
+                        trade.stockName=stockName;
+                        //trade generated
+                        executedTrades.push_back(trade);
+                        trades.push_back(trade);
+
+                        //now update quantities
+                        o.quantity-=tradingQuantity;
+                        oldest.quantity-=tradingQuantity;
+                        totalSellQuantities-=tradingQuantity;//For FOK orders
+
+                        if(oldest.quantity==0)
+                        {
+                            idToOrderMappingForSell.erase(oldest.orderId);
+                            sellQueue.popfront();
+                            
+                        }
+
+                        if(sellQueue.isEmpty())
+                        {
+                            sellBook.erase(bestSell);
+                        }
+                    }
+                    
+                    
+                   }
                 }
                 
             }
             else if(o.side==BuyOrSell::SELL)
             {
                 //now came a sell order, buy order resting
-                if(o.type==OrderType::LIMIT)
+                if(o.type==OrderType::LIMIT || o.type==OrderType::IOC)
                 {
                             while(o.quantity>0 && !buyBook.empty())//order has some qty left and sell book not empty
                         {
@@ -172,11 +252,13 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
 
                                 oldestBuy.quantity-=trade.quantity;
                                 o.quantity-=trade.quantity;
+                                totalBuyQuantities-=tradingQuantity;//For FOK orders
 
                                 if(oldestBuy.quantity==0)
                                 {
-                                    buyQueue.popfront();
                                     idToOrderMappingForBuy.erase(oldestBuy.orderId);
+                                    buyQueue.popfront();
+                                    
                                 }
 
                                 if(buyQueue.isEmpty())
@@ -189,10 +271,11 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                             }
                             else break;
                         }
-                        if(o.quantity>0)
+                        if(o.quantity>0 && o.type==OrderType::LIMIT)
                         {
                             sellBook[o.price].pushback(o);
                             idToOrderMappingForSell[o.orderId]=o.price;
+                            totalSellQuantities+=o.quantity;//For FOK orders
                             
                         }
 
@@ -228,11 +311,13 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         //now update quantities
                         o.quantity-=tradingQuantity;
                         oldest.quantity-=tradingQuantity;
+                        totalBuyQuantities-=tradingQuantity;//For FOK orders
 
                         if(oldest.quantity==0)
                         {
+                            idToOrderMappingForBuy.erase(oldest.orderId);
                             buyQueue.popfront();
-                            idToOrderMappingForSell.erase(oldest.orderId);
+                            
                         }
 
                         if(buyQueue.isEmpty())
@@ -256,6 +341,80 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
 
                     }
                 }
+                else if(o.type==OrderType::FOK)
+                {
+                   //Fill or kill
+                   if(o.quantity>totalBuyQuantities)
+                   {
+                        cout<<"Order cancelled\n";
+                        cout<<"Reason:Insufficient buy quantities\n";
+                        return {};
+                   }
+                   else{
+                    //check if all required quantities have price less than equal to as required for this order
+                    int qtyTemp=0;
+                    for(auto iter:buyBook)
+                    {
+                        if(qtyTemp>=o.quantity)
+                        {
+                            break;
+                        }
+                        if(iter.first<o.price)//cancel order as till now not required qts matched and buy price decreased
+                        {
+                            //kill order
+                            cout<<"Order cancelled\n";
+                            cout<<"Reason:Buy Price less than selling price\n";
+                            return {};
+                        }
+                        qtyTemp+=iter.second.getTotalQuantity();
+                        
+                    }
+                    //if came till here, this means order shd be filled for sure
+                    while(o.quantity>0)//2nd cond not written as we know this will pass anyway
+                    {
+                        auto bestBuy=buyBook.begin();//bestbuy will be at top of buyBook
+                        CustomLinkedQueue &buyQueue=bestBuy->second;
+                        Order &oldest=buyQueue.start();
+                        //match order
+                        Trade trade;
+                        trade.buyOrderId=oldest.orderId;
+                        trade.sellOrderId=o.orderId;
+                        
+                        int tradingQuantity=min(o.quantity,oldest.quantity);
+                        trade.quantity=tradingQuantity;
+                        trade.time_stamp=o.timeStamp;
+                        trade.tradeId=nextTradeId;
+                        nextTradeId++;
+
+                        trade.tradePrice=oldest.price;//resting price
+                        
+                        
+                        trade.stockName=stockName;
+                        //trade generated
+                        executedTrades.push_back(trade);
+                        trades.push_back(trade);
+
+                        //now update quantities
+                        o.quantity-=tradingQuantity;
+                        oldest.quantity-=tradingQuantity;
+                        totalBuyQuantities-=tradingQuantity;//For FOK orders
+
+                        if(oldest.quantity==0)
+                        {
+                            idToOrderMappingForBuy.erase(oldest.orderId);
+                            buyQueue.popfront();
+                            
+                        }
+
+                        if(buyQueue.isEmpty())
+                        {
+                            buyBook.erase(bestBuy);
+                        }
+                    }
+                    
+                    
+                   }
+                }
                 
                 
             }
@@ -276,6 +435,7 @@ void OrderBook::deleteOrder(int &oid,BuyOrSell side)
         
        
        double toBeDeletedprice=idToOrderMappingForBuy[oid];
+       totalBuyQuantities-=buyBook[toBeDeletedprice].getNodeForGivenId(oid)->order.quantity;
        buyBook[toBeDeletedprice].pop(oid);
        if(buyBook[toBeDeletedprice].isEmpty())
        {
@@ -294,6 +454,7 @@ void OrderBook::deleteOrder(int &oid,BuyOrSell side)
         
        
        double toBeDeletedprice=idToOrderMappingForSell[oid];
+       totalSellQuantities-=sellBook[toBeDeletedprice].getNodeForGivenId(oid)->order.quantity;
        sellBook[toBeDeletedprice].pop(oid);
        if(sellBook[toBeDeletedprice].isEmpty())
        {
@@ -331,6 +492,7 @@ void OrderBook::showOrderBook() const
 
     cout<<"----------------------------------------------------------------------------------------------\n";
 
+
     }
 
     cout<<"\nSell Orders:\n";
@@ -352,6 +514,9 @@ void OrderBook::showOrderBook() const
 
 
     }
+    cout<<"Total Buy Quantities : "<<totalBuyQuantities<<endl;
+    cout<<"Total Sell Quantities : "<<totalSellQuantities<<endl;
+    
 }
 
 //now display all executed trades which we stored in trades vector

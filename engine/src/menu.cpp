@@ -27,7 +27,7 @@ void callMenu(OrderBook &orderBook,int &buyid,int &sellid,int &timestamp)
                 {
                     system("cls");
                     int orderTypeInNumberAsChoice;
-                    cout<<"press 1 for Limit Order ,2 For Market Order\n";
+                    cout<<"press 1 for Limit Order ,2 For Market Order,3 For FOK(Fill or Kill) Order,4 for IOC(Immediate or cancel)\n";
                     cin>>orderTypeInNumberAsChoice;
                     cout<<endl;
 
@@ -39,6 +39,14 @@ void callMenu(OrderBook &orderBook,int &buyid,int &sellid,int &timestamp)
                     else if(orderTypeInNumberAsChoice==2)
                     {
                         order.type=OrderType::MARKET;
+                    }
+                    else if(orderTypeInNumberAsChoice==3)
+                    {
+                        order.type=OrderType::FOK;
+                    }
+                    else if(orderTypeInNumberAsChoice==4)
+                    {
+                        order.type=OrderType::IOC;
                     }
                     else{
                         //default
@@ -53,7 +61,7 @@ void callMenu(OrderBook &orderBook,int &buyid,int &sellid,int &timestamp)
                     cout<<endl;
 
                     
-                    if(orderTypeInNumberAsChoice==1)
+                    if(orderTypeInNumberAsChoice!=2)//PRICE NOT REQUIRED FOR MARKET ORDER
                     {
                         cout<<"plz enter your atmost buying price: ";
                         cin>>order.price;
@@ -66,7 +74,7 @@ void callMenu(OrderBook &orderBook,int &buyid,int &sellid,int &timestamp)
                 {
                     system("cls");
                     int orderTypeInNumberAsChoice;
-                    cout<<"press 1 for Limit Order ,2 For Market Order\n";
+                    cout<<"press 1 for Limit Order ,2 For Market Order,3 For FOK(fILL OR kILL) Order,4 For IOC(Immediate or Cancel)Order\n";
                     cin>>orderTypeInNumberAsChoice;
                     cout<<endl;
                     
@@ -78,6 +86,14 @@ void callMenu(OrderBook &orderBook,int &buyid,int &sellid,int &timestamp)
                     else if(orderTypeInNumberAsChoice==2)
                     {
                         order.type=OrderType::MARKET;
+                    }
+                    else if(orderTypeInNumberAsChoice==3)
+                    {
+                        order.type=OrderType::FOK;
+                    }
+                    else if(orderTypeInNumberAsChoice==4)
+                    {
+                        order.type=OrderType::IOC;
                     }
                     else{
                         //default
@@ -91,7 +107,7 @@ void callMenu(OrderBook &orderBook,int &buyid,int &sellid,int &timestamp)
                     cin>>order.quantity;
                     cout<<endl;
 
-                    if(orderTypeInNumberAsChoice==1)
+                    if(orderTypeInNumberAsChoice!=2)
                     {
                         cout<<"plz enter your atleast selling price: ";
                         cin>>order.price;

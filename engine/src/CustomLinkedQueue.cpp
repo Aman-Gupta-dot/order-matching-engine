@@ -8,6 +8,7 @@ CustomLinkedQueue::CustomLinkedQueue()
     front=NULL;
     rear=NULL;
     size=0;
+    totalQuantity=0;
 }
 
 int CustomLinkedQueue::isEmpty()
@@ -34,6 +35,7 @@ void CustomLinkedQueue::pushback(Order order)
 {
     size++;
     Node *newnode=new Node(order);
+    totalQuantity+=order.quantity;
     idToOrderMapping[order.orderId]=newnode;//make entry
     if(rear==NULL)
     {
@@ -50,7 +52,7 @@ void CustomLinkedQueue::popback()
 {
     size--;
     if(isEmpty())return;
-
+    totalQuantity-=rear->order.quantity;
     idToOrderMapping.erase(end().orderId);
     if(front==rear)
     {
@@ -73,7 +75,7 @@ void CustomLinkedQueue::popfront()
 { 
     size--;
     if(isEmpty())return;
-
+    totalQuantity-=front->order.quantity;
     idToOrderMapping.erase(start().orderId);
     if(front==rear)
     {
@@ -109,6 +111,8 @@ void CustomLinkedQueue::pop(int id)
             Node*addr=idToOrderMapping[id];//pop this given address
             idToOrderMapping.erase(id);//remove this mapping from map
 
+            totalQuantity-=addr->order.quantity;
+
             addr->prev->next=addr->next;
             addr->next->prev=addr->prev;
             delete(addr);
@@ -132,4 +136,8 @@ Node* CustomLinkedQueue::getRear() const
 Node* CustomLinkedQueue::getNodeForGivenId(int &id)
 {
     return idToOrderMapping[id];
+}
+
+int CustomLinkedQueue::getTotalQuantity() const{
+    return totalQuantity;
 }
