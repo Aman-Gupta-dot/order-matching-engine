@@ -128,15 +128,17 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                     {
                         //no more sellers left
                         //you can display message
-                        cout<<"-------MARKET ORDER SUMMARY-------\n";
-                        cout<<"requested quantities : "<<totalRequestedQuantities<<"\n";
-                        cout<<"Executed quantities : "<<totalRequestedQuantities-o.quantity<<"\n";
-                        cout<<"Unfilled quantities : "<<o.quantity<<"\n";
+                        if(verbose)
+                        {
+                            cout<<"-------MARKET ORDER SUMMARY-------\n";
+                            cout<<"requested quantities : "<<totalRequestedQuantities<<"\n";
+                            cout<<"Executed quantities : "<<totalRequestedQuantities-o.quantity<<"\n";
+                            cout<<"Unfilled quantities : "<<o.quantity<<"\n";
 
-                        cout<<"Reason:\n";
-                        cout<<"No more sell orders in sellBook, so remaining quantities are cancelled\n";
-                        cout<<"----------------------------------\n";
-
+                            cout<<"Reason:\n";
+                            cout<<"No more sell orders in sellBook, so remaining quantities are cancelled\n";
+                            cout<<"----------------------------------\n";
+                        }
 
                     }
                 }
@@ -145,9 +147,13 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                     //Fill or kill
                    if(o.quantity>totalSellQuantities)
                    {
-                        cout<<"Order cancelled\n";
-                        cout<<"Reason:Insufficient sell quantities\n";
-                        return {};
+                        if(verbose)
+                        {
+                            cout<<"Order cancelled\n";
+                            cout<<"Reason:Insufficient sell quantities\n";
+                        }
+                            return {};
+                        
                    }
                    else{
                     //check if all required quantities have price less than equal to as required for this order
@@ -161,9 +167,13 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         if(iter.first>o.price)//cancel order as till now not required qts matched and sell price increased
                         {
                             //kill order
-                            cout<<"Order cancelled\n";
-                            cout<<"Reason:selling price more than buy price\n";
-                            return {};
+                            if(verbose)
+                            {
+                                cout<<"Order cancelled\n";
+                                cout<<"Reason:selling price more than buy price\n";
+                            }
+                                return {};
+                            
                         }
                         qtyTemp+=iter.second.getTotalQuantity();
                         
@@ -329,14 +339,17 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                     {
                         //no more sellers left
                         //you can display message
-                        cout<<"-------MARKET ORDER SUMMARY-------\n";
-                        cout<<"requested quantities : "<<totalRequestedQuantities<<"\n";
-                        cout<<"Executed quantities : "<<totalRequestedQuantities-o.quantity<<"\n";
-                        cout<<"Unfilled quantities : "<<o.quantity<<"\n";
+                        if(verbose)
+                        {
+                            cout<<"-------MARKET ORDER SUMMARY-------\n";
+                            cout<<"requested quantities : "<<totalRequestedQuantities<<"\n";
+                            cout<<"Executed quantities : "<<totalRequestedQuantities-o.quantity<<"\n";
+                            cout<<"Unfilled quantities : "<<o.quantity<<"\n";
 
-                        cout<<"Reason:\n";
-                        cout<<"No more sell orders in sellBook so remaining quantities are cancelled\n";
-                        cout<<"----------------------------------\n";
+                            cout<<"Reason:\n";
+                            cout<<"No more sell orders in sellBook so remaining quantities are cancelled\n";
+                            cout<<"----------------------------------\n";
+                        }
 
 
                     }
@@ -346,8 +359,11 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                    //Fill or kill
                    if(o.quantity>totalBuyQuantities)
                    {
-                        cout<<"Order cancelled\n";
-                        cout<<"Reason:Insufficient buy quantities\n";
+                        if(verbose)
+                        {
+                            cout<<"Order cancelled\n";
+                            cout<<"Reason:Insufficient buy quantities\n";
+                        }
                         return {};
                    }
                    else{
@@ -362,8 +378,10 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         if(iter.first<o.price)//cancel order as till now not required qts matched and buy price decreased
                         {
                             //kill order
-                            cout<<"Order cancelled\n";
-                            cout<<"Reason:Buy Price less than selling price\n";
+                            if(verbose){
+                                cout<<"Order cancelled\n";
+                                cout<<"Reason:Buy Price less than selling price\n";
+                            }
                             return {};
                         }
                         qtyTemp+=iter.second.getTotalQuantity();
@@ -425,7 +443,7 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
 
 void OrderBook::deleteOrder(int &oid,BuyOrSell side)
 {
-    
+
     if(side==BuyOrSell::BUY)
     {
         if(idToOrderMappingForBuy.count(oid)==0)
@@ -434,7 +452,7 @@ void OrderBook::deleteOrder(int &oid,BuyOrSell side)
             return;
         }
         
-       
+       cout<<"cancelled oid : "<<oid<<endl;
        double toBeDeletedprice=idToOrderMappingForBuy[oid];
        totalBuyQuantities-=buyBook[toBeDeletedprice].getNodeForGivenId(oid)->order.quantity;
        buyBook[toBeDeletedprice].pop(oid);
@@ -453,7 +471,7 @@ void OrderBook::deleteOrder(int &oid,BuyOrSell side)
             return;
         }
         
-       
+       cout<<"cancelled oid : "<<oid<<endl;
        double toBeDeletedprice=idToOrderMappingForSell[oid];
        totalSellQuantities-=sellBook[toBeDeletedprice].getNodeForGivenId(oid)->order.quantity;
        sellBook[toBeDeletedprice].pop(oid);
@@ -539,4 +557,8 @@ void OrderBook::showTrades() const{
 
 string OrderBook::getStockName()const{
     return stockName;
+}
+void OrderBook::setVerbose(bool value)
+{
+    verbose=value;
 }

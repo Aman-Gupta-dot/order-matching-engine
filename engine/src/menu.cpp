@@ -10,7 +10,7 @@ void callMenu()
     int overallId=1000;
     
     int overallTimeStamp=0;
-    Exchange exchange;
+    Exchange exchange(true);
     while(true)
     {
         cout<<"================Order Matching Engine================\n";

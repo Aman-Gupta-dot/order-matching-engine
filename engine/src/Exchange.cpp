@@ -2,13 +2,18 @@
 using namespace std;
 #include "../include/Exchange.hpp"
 
-Exchange::Exchange()
+Exchange::Exchange(bool value)
 {
     
     books.emplace("Dairy Milk",OrderBook("Dairy Milk"));
-    books.emplace("5-star",OrderBook("5-star"));
+    books.emplace("5 Star",OrderBook("5 Star"));
     books.emplace("Ferrero Rocher",OrderBook("Ferrero Rocher"));
     books.emplace("Kinder Joy",OrderBook("Kinder Joy"));
+
+    for(auto &i: books)
+    {
+        i.second.setVerbose(value);
+    }
 }
 
 void Exchange::placeOrder(Order order)
@@ -21,6 +26,7 @@ void Exchange::placeOrder(Order order)
         return;
     }
     it->second.placeOrder(order);
+    excStatistics.incrementOrdersReceived();
 }
 
 void Exchange::cancelOrder(int &oid,string &stockName,BuyOrSell side)
@@ -33,6 +39,7 @@ void Exchange::cancelOrder(int &oid,string &stockName,BuyOrSell side)
         return;
     }
     it->second.deleteOrder(oid,side);
+    excStatistics.incrementOrdersCancelled();
     // books[stockName].deleteOrder(oid,side);
 }
 
