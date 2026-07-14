@@ -425,6 +425,7 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
 
 void OrderBook::deleteOrder(int &oid,BuyOrSell side)
 {
+    
     if(side==BuyOrSell::BUY)
     {
         if(idToOrderMappingForBuy.count(oid)==0)
