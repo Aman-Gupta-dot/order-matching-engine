@@ -18,7 +18,8 @@ void callMenu()
         cout<<"2.Cancel Order\n";
         cout<<"3.View Order Book\n";
         cout<<"4.View Trades\n";
-        cout<<"5.Exit\n";
+        cout<<"5.Statistics\n";
+        cout<<"6.Exit\n";
 
         int choice;
         cout<<"Please enter your choice : ";
@@ -111,6 +112,10 @@ void callMenu()
         else if(choice==4)
         {
             exchange.showTrades(choice2);
+        }
+        else if(choice==5)
+        {
+            exchange.showStatistics(choice2);
         }
         else{
             cout<<"Thank you so much for using our engine\n";

@@ -27,3 +27,8 @@ void ExchangeStatistics::setTradesExecuted(int &value)
 {
     tradesExecuted=value;
 }
+void ExchangeStatistics::setTradedQuantity(int &value)
+{
+    tradedQuantity=value;
+}
+

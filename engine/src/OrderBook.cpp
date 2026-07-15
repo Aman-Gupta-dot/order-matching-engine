@@ -31,6 +31,7 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                             //this queue has selling orders aligned in this queue for this particular price
                             Order &oldest=sellQueue.start();//to make changes to original q we used &
                             int tradingQuantity=min(oldest.quantity,o.quantity);
+                            
 
                             Trade trade;
                             trade.tradeId=nextTradeId;
@@ -39,6 +40,7 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                             trade.buyOrderId=o.orderId;
                             trade.sellOrderId=oldest.orderId;
                             trade.quantity=tradingQuantity;
+                            
                             trade.stockName=stockName;
                             
                             trade.tradePrice=oldest.price;//resting order price;
@@ -52,11 +54,18 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                             oldest.quantity-=tradingQuantity;
                             totalSellQuantities-=tradingQuantity;//For FOK orders
 
+                            //stats
+                            totalTradedQuantity+=tradingQuantity;
+                            totalTradedValue+=trade.tradePrice;
+                            
+
                             if(oldest.quantity==0)
                             {
                                 idToOrderMappingForSell.erase(oldest.orderId);//these 2 lines in this order only
                                 //otherwise if reversed pop will destroy &oldest referenece so can dangle
                                 sellQueue.popfront();
+                                //stats
+                                activeSellOrders--;//orders reduce when quantity becomes 0
                                 
                             }
 
@@ -75,6 +84,10 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         buyBook[o.price].pushback(o);
                         idToOrderMappingForBuy[o.orderId]=o.price;
                         totalBuyQuantities+=o.quantity;//For FOK orders
+
+                        //stats
+                        activeBuyOrders++;
+                        ordersReceived++;
                         
                     }
 
@@ -95,6 +108,7 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         
                         int tradingQuantity=min(o.quantity,oldest.quantity);
                         trade.quantity=tradingQuantity;
+                        
                         trade.time_stamp=o.timeStamp;
                         trade.tradeId=nextTradeId;
                         nextTradeId++;
@@ -112,10 +126,17 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         oldest.quantity-=tradingQuantity;
                         totalSellQuantities-=tradingQuantity;//For FOK orders
 
+                        //stats
+                        totalTradedQuantity+=tradingQuantity;
+                        totalTradedValue+=trade.tradePrice;
+                        
+
                         if(oldest.quantity==0)
                         {
                             idToOrderMappingForSell.erase(oldest.orderId);
                             sellQueue.popfront();
+                            //stats
+                                activeSellOrders--;//orders reduce when quantity becomes 0
                             
                         }
 
@@ -191,6 +212,7 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         
                         int tradingQuantity=min(o.quantity,oldest.quantity);
                         trade.quantity=tradingQuantity;
+                        
                         trade.time_stamp=o.timeStamp;
                         trade.tradeId=nextTradeId;
                         nextTradeId++;
@@ -208,10 +230,17 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         oldest.quantity-=tradingQuantity;
                         totalSellQuantities-=tradingQuantity;//For FOK orders
 
+                        //stats
+                        totalTradedQuantity+=tradingQuantity;
+                        totalTradedValue+=trade.tradePrice;
+                        
+
                         if(oldest.quantity==0)
                         {
                             idToOrderMappingForSell.erase(oldest.orderId);
                             sellQueue.popfront();
+                            //stats
+                                activeSellOrders--;//orders reduce when quantity becomes 0
                             
                         }
 
@@ -249,6 +278,7 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                                 
                                 int tradingQuantity=min(o.quantity,oldestBuy.quantity);
                                 trade.quantity=tradingQuantity;
+                                
                                 trade.tradeId=nextTradeId;
                                 nextTradeId++;
 
@@ -264,10 +294,17 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                                 o.quantity-=trade.quantity;
                                 totalBuyQuantities-=tradingQuantity;//For FOK orders
 
+                                //stats
+                                totalTradedQuantity+=tradingQuantity;
+                                totalTradedValue+=trade.tradePrice;
+                                
+
                                 if(oldestBuy.quantity==0)
                                 {
                                     idToOrderMappingForBuy.erase(oldestBuy.orderId);
                                     buyQueue.popfront();
+                                    //stats
+                                activeBuyOrders--;//orders reduce when quantity becomes 0
                                     
                                 }
 
@@ -286,6 +323,10 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                             sellBook[o.price].pushback(o);
                             idToOrderMappingForSell[o.orderId]=o.price;
                             totalSellQuantities+=o.quantity;//For FOK orders
+
+                            //stats
+                            activeSellOrders++;
+                            ordersReceived++;
                             
                         }
 
@@ -306,6 +347,7 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         
                         int tradingQuantity=min(o.quantity,oldest.quantity);
                         trade.quantity=tradingQuantity;
+                        
                         trade.time_stamp=o.timeStamp;
                         trade.tradeId=nextTradeId;
                         nextTradeId++;
@@ -323,10 +365,17 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         oldest.quantity-=tradingQuantity;
                         totalBuyQuantities-=tradingQuantity;//For FOK orders
 
+                        //stats
+                        totalTradedQuantity+=tradingQuantity;
+                        totalTradedValue+=trade.tradePrice;
+                        
+
                         if(oldest.quantity==0)
                         {
                             idToOrderMappingForBuy.erase(oldest.orderId);
                             buyQueue.popfront();
+                            //stats
+                            activeBuyOrders--;//orders reduce when quantity becomes 0
                             
                         }
 
@@ -400,6 +449,7 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         
                         int tradingQuantity=min(o.quantity,oldest.quantity);
                         trade.quantity=tradingQuantity;
+                        
                         trade.time_stamp=o.timeStamp;
                         trade.tradeId=nextTradeId;
                         nextTradeId++;
@@ -417,10 +467,17 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         oldest.quantity-=tradingQuantity;
                         totalBuyQuantities-=tradingQuantity;//For FOK orders
 
+                        //stats
+                        totalTradedQuantity+=tradingQuantity;
+                        totalTradedValue+=trade.tradePrice;
+                        
+
                         if(oldest.quantity==0)
                         {
                             idToOrderMappingForBuy.erase(oldest.orderId);
                             buyQueue.popfront();
+                            //stats
+                            activeBuyOrders--;//orders reduce when quantity becomes 0
                             
                         }
 
@@ -454,7 +511,7 @@ void OrderBook::deleteOrder(int &oid,BuyOrSell side)
         
        cout<<"cancelled oid : "<<oid<<endl;
        double toBeDeletedprice=idToOrderMappingForBuy[oid];
-       totalBuyQuantities-=buyBook[toBeDeletedprice].getNodeForGivenId(oid)->order.quantity;
+       totalBuyQuantities-=buyBook[toBeDeletedprice].getNodeForGivenId(oid)->order.quantity;//for stats also
        buyBook[toBeDeletedprice].pop(oid);
        if(buyBook[toBeDeletedprice].isEmpty())
        {
@@ -462,6 +519,10 @@ void OrderBook::deleteOrder(int &oid,BuyOrSell side)
        }
 
        idToOrderMappingForBuy.erase(oid);    
+       //stats
+       activeBuyOrders--;
+       ordersCancelled++;
+
     }
     else
     {
@@ -473,13 +534,16 @@ void OrderBook::deleteOrder(int &oid,BuyOrSell side)
         
        cout<<"cancelled oid : "<<oid<<endl;
        double toBeDeletedprice=idToOrderMappingForSell[oid];
-       totalSellQuantities-=sellBook[toBeDeletedprice].getNodeForGivenId(oid)->order.quantity;
+       totalSellQuantities-=sellBook[toBeDeletedprice].getNodeForGivenId(oid)->order.quantity;//also for stats
        sellBook[toBeDeletedprice].pop(oid);
        if(sellBook[toBeDeletedprice].isEmpty())
        {
         sellBook.erase(toBeDeletedprice);
        }
-       idToOrderMappingForSell.erase(oid);    
+       idToOrderMappingForSell.erase(oid); 
+       //stats
+       activeSellOrders--;   
+       ordersCancelled++;
     }
 }
 
@@ -561,4 +625,64 @@ string OrderBook::getStockName()const{
 void OrderBook::setVerbose(bool value)
 {
     verbose=value;
+}
+int OrderBook::getTradesExecuted()
+{
+    return trades.size();
+}
+int OrderBook::getTradedQuantity()
+{
+    return totalTradedQuantity;
+}
+int OrderBook::getTradedValue()
+{
+    return totalTradedValue;
+}
+int OrderBook::getActiveBuyOrders()
+{
+    return activeBuyOrders;
+}
+int OrderBook::getActiveSellOrders()
+{
+    return activeSellOrders;
+}
+int OrderBook::getBuyVolume()
+{
+    return totalBuyQuantities;
+}
+int OrderBook::getSellVolume()
+{
+    return totalSellQuantities;
+}
+int OrderBook::getBestBid()
+{
+    if(buyBook.empty())
+    {
+        return 0;//i.e no best bid
+    }
+    else
+    {
+        auto bestBuy=buyBook.begin();
+        return bestBuy->second.start().price;//highest buy price in order book
+    }
+}
+int OrderBook::getBestAsk()
+{
+    if(sellBook.empty())
+    {
+        return 0;//i.e no best Ask
+    }
+    else
+    {
+        auto bestSell=sellBook.begin();
+        return bestSell->second.start().price;//lowest sell price in order book
+    }
+}
+int OrderBook::getOrdersReceived()
+{
+    return ordersReceived;
+}
+int OrderBook::getOrdersCancelled()
+{
+    return ordersCancelled;
 }

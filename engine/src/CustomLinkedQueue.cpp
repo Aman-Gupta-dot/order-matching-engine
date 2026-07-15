@@ -141,3 +141,6 @@ Node* CustomLinkedQueue::getNodeForGivenId(int &id)
 int CustomLinkedQueue::getTotalQuantity() const{
     return totalQuantity;
 }
+unordered_map<int,Node*> CustomLinkedQueue:: getIdToOrderMapping() const{
+    return idToOrderMapping;
+}
