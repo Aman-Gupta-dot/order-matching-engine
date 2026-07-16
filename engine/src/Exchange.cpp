@@ -5,10 +5,10 @@ using namespace std;
 Exchange::Exchange(bool value)
 {
     
-    books.emplace("Dairy Milk",OrderBook("Dairy Milk"));
-    books.emplace("5 Star",OrderBook("5 Star"));
-    books.emplace("Ferrero Rocher",OrderBook("Ferrero Rocher"));
-    books.emplace("Kinder Joy",OrderBook("Kinder Joy"));
+    books.emplace("DairyMilk",OrderBook("DairyMilk"));
+    books.emplace("5Star",OrderBook("5Star"));
+    books.emplace("FerreroRocher",OrderBook("FerreroRocher"));
+    books.emplace("KinderJoy",OrderBook("KinderJoy"));
 
     for(auto &i: books)
     {
@@ -18,6 +18,13 @@ Exchange::Exchange(bool value)
 
 void Exchange::placeOrder(Order order)
 {
+    cout << "Exchange::placeOrder() called\n";
+cout << "Searching for [" << order.stockName << "]\n";
+
+for (const auto &x : books)
+{
+    cout << "Book : [" << x.first << "]\n";
+}
     auto it = books.find(order.stockName);
 
     if(it == books.end())
@@ -25,26 +32,30 @@ void Exchange::placeOrder(Order order)
         cout << "Invalid Stock Name\n";
         return;
     }
+    order.orderId=++orderId;
+    order.timeStamp=++timestamp;
     it->second.placeOrder(order);
     
 }
 
-void Exchange::cancelOrder(int &oid,string &stockName,BuyOrSell side)
+int Exchange::cancelOrder(int &oid,string &stockName,BuyOrSell side)
 {
     auto it = books.find(stockName);
 
     if(it == books.end())
     {
         cout << "Invalid Stock Name\n";
-        return;
+        return 0;
     }
-    it->second.deleteOrder(oid,side);
+    int response=it->second.deleteOrder(oid,side);
+    return response;
     
     // books[stockName].deleteOrder(oid,side);
 }
 
 void Exchange::viewOrderBook(string &stockName)
 {
+    
     auto it = books.find(stockName);
 
     if(it == books.end())
@@ -115,5 +126,43 @@ void Exchange::showStatistics(string &stockName)
     
 
 }
-unordered_map<string,OrderBook> getBooks() const;
+unordered_map<string,OrderBook> Exchange::getBooks() const{
+    return books;
+}
+OrderBookSnapshot Exchange::getOrderBook(string &stockName)const{
+
+    auto it = books.find(stockName);
+
+    if(it == books.end())
+    {
+        cout << "Invalid Stock Name\n";
+        return {};
+    }
+    return it->second.getOrderBook();
+    
+}
+TradeBook Exchange::getTradeBook(string &stockName)const{
+
+    auto it = books.find(stockName);
+
+    if(it == books.end())
+    {
+        cout << "Invalid Stock Name\n";
+        return {};
+    }
+    return it->second.getTradeBook();
+}
+StatisticsBook Exchange::getStatisticsBook(string &stockName)const
+{
+    auto it = books.find(stockName);
+
+    if(it == books.end())
+    {
+        cout << "Invalid Stock Name\n";
+        return {};
+    }
+    return it->second.getStatisticsBook();
+
+}
+
 

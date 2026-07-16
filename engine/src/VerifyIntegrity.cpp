@@ -2,15 +2,15 @@
 using namespace std;
 #include "../include/VerifyIntegrity.hpp"
 
-bool VerifyIntegrity::checkQueue(map<int,CustomLinkedQueue,greater<int> >buyBook,map<int,CustomLinkedQueue >sellBook)
+bool VerifyIntegrity::checkQueue(map<int,CustomLinkedQueue,greater<int> >&buyBook,map<int,CustomLinkedQueue >&sellBook)
 {
     //check 1
     //for every queue if q not empty(definitely not be) front->prev=Null and rear->next=null
     bool check=true;
     for(auto it:buyBook)
     {
-        CustomLinkedQueue que=it.second;
-        if(que.getFront()->prev==NULL && que.getRear()->next==NULL)
+        CustomLinkedQueue &que=it.second;
+        if(que.getFront()->prev!=NULL || que.getRear()->next!=NULL)
         {
             check=false;
             cout<<"\nError!!\n";
@@ -53,8 +53,8 @@ bool VerifyIntegrity::checkQueue(map<int,CustomLinkedQueue,greater<int> >buyBook
 
      for(auto it:sellBook)
     {
-        CustomLinkedQueue que=it.second;
-        if(que.getFront()->prev==NULL && que.getRear()->next==NULL)
+        CustomLinkedQueue &que=it.second;
+        if(que.getFront()->prev!=NULL || que.getRear()->next!=NULL)
         {
             check=false;
             cout<<"\nError!!\n";
@@ -91,14 +91,14 @@ bool VerifyIntegrity::checkQueue(map<int,CustomLinkedQueue,greater<int> >buyBook
 
 }
 
-bool VerifyIntegrity::checkPriceLevels(map<int,CustomLinkedQueue,greater<int> >buyBook,map<int,CustomLinkedQueue >sellBook)
+bool VerifyIntegrity::checkPriceLevels(map<int,CustomLinkedQueue,greater<int> >&buyBook,map<int,CustomLinkedQueue >&sellBook)
 {
     //for every pricelevel for all nodes in queue shd have same price
     bool check=true;
     for(auto i:buyBook)
     {
         int actualPrice=i.first;
-        CustomLinkedQueue que=i.second;
+        CustomLinkedQueue &que=i.second;
         Node*temp=que.getFront();
 
         while(temp!=NULL)
@@ -118,7 +118,7 @@ bool VerifyIntegrity::checkPriceLevels(map<int,CustomLinkedQueue,greater<int> >b
     for(auto i:sellBook)
     {
         int actualPrice=i.first;
-        CustomLinkedQueue que=i.second;
+        CustomLinkedQueue &que=i.second;
         Node*temp=que.getFront();
 
         while(temp!=NULL)
@@ -137,7 +137,7 @@ bool VerifyIntegrity::checkPriceLevels(map<int,CustomLinkedQueue,greater<int> >b
     return check;
 }
 
-bool VerifyIntegrity::checkOrderBook(map<int,CustomLinkedQueue,greater<int> >buyBook,map<int,CustomLinkedQueue >sellBook,int totalBuyQuantities,int totalSellQuantities,int activeBuyOrders,int activeSellOrders)
+bool VerifyIntegrity::checkOrderBook(map<int,CustomLinkedQueue,greater<int> >&buyBook,map<int,CustomLinkedQueue >&sellBook,int totalBuyQuantities,int totalSellQuantities,int activeBuyOrders,int activeSellOrders)
 {
     //check 1
     //sum(all buy qts in order book) must be equal to totalBuyQts
@@ -146,7 +146,7 @@ bool VerifyIntegrity::checkOrderBook(map<int,CustomLinkedQueue,greater<int> >buy
     int totalOrders=0;
     for(auto i:buyBook)
     {
-        CustomLinkedQueue que=i.second;
+        CustomLinkedQueue &que=i.second;
         Node*temp=que.getFront();
 
         while(temp!=NULL)
@@ -157,13 +157,9 @@ bool VerifyIntegrity::checkOrderBook(map<int,CustomLinkedQueue,greater<int> >buy
 
          //check 2
         //sum(queue) sizes must equal ActiveBuyOrders
-        temp=que.getFront();
         
-        while(temp!=NULL)
-        {
             totalOrders+=que.getSize();
-            temp=temp->next;
-        }
+        
 
         
 
@@ -186,7 +182,7 @@ bool VerifyIntegrity::checkOrderBook(map<int,CustomLinkedQueue,greater<int> >buy
     totalOrders=0;
     for(auto i:sellBook)
     {
-        CustomLinkedQueue que=i.second;
+        CustomLinkedQueue &que=i.second;
         Node*temp=que.getFront();
 
         while(temp!=NULL)
@@ -197,13 +193,8 @@ bool VerifyIntegrity::checkOrderBook(map<int,CustomLinkedQueue,greater<int> >buy
 
         //check 2
         //sum(queue) sizes must equal ActiveBuyOrders
-        temp=que.getFront();
-        
-        while(temp!=NULL)
-        {
             totalOrders+=que.getSize();
-            temp=temp->next;
-        }
+        
     }
     if(checkTotalSellQuantities!=totalSellQuantities)
     {
@@ -221,15 +212,15 @@ bool VerifyIntegrity::checkOrderBook(map<int,CustomLinkedQueue,greater<int> >buy
     return check;
 }
 
-bool VerifyIntegrity::checkMapping(map<int,CustomLinkedQueue,greater<int> >buyBook,map<int,CustomLinkedQueue >sellBook)
+bool VerifyIntegrity::checkMapping(map<int,CustomLinkedQueue,greater<int> >&buyBook,map<int,CustomLinkedQueue >&sellBook)
 {
     bool check=true;
     //check1
     //for every node order id must exist in idToOrderMapping and mapped price must equal order.price
     for(auto i:buyBook)
     {
-        CustomLinkedQueue que=i.second;
-        unordered_map<int,Node*> mapping=que.getIdToOrderMapping();
+        CustomLinkedQueue &que=i.second;
+        const unordered_map<int,Node*> &mapping=que.getIdToOrderMapping();
         Node*temp=que.getFront();
         while(temp!=NULL)
         {
@@ -246,7 +237,7 @@ bool VerifyIntegrity::checkMapping(map<int,CustomLinkedQueue,greater<int> >buyBo
         temp=que.getFront();
         while(temp!=NULL)
         {
-            if(mapping.count(temp->order.orderId) && mapping[temp->order.orderId]->order.price!=temp->order.price)
+            if(mapping.count(temp->order.orderId) && mapping.at(temp->order.orderId)->order.price!=temp->order.price)
             {
                 check=false;
                 cout<<"\nError!!\n";
@@ -258,9 +249,9 @@ bool VerifyIntegrity::checkMapping(map<int,CustomLinkedQueue,greater<int> >buyBo
     }
     for(auto i:sellBook)
     {
-        CustomLinkedQueue que=i.second;
+        CustomLinkedQueue &que=i.second;
         Node*temp=que.getFront();
-        unordered_map<int,Node*> mapping=que.getIdToOrderMapping();
+        const unordered_map<int,Node*> &mapping=que.getIdToOrderMapping();
         while(temp!=NULL)
         {
             if(mapping.count(temp->order.orderId)==0)
@@ -276,7 +267,7 @@ bool VerifyIntegrity::checkMapping(map<int,CustomLinkedQueue,greater<int> >buyBo
         temp=que.getFront();
         while(temp!=NULL)
         {
-            if(mapping.count(temp->order.orderId) && mapping[temp->order.orderId]->order.price!=temp->order.price)
+            if(mapping.count(temp->order.orderId) && mapping.at(temp->order.orderId)->order.price!=temp->order.price)
             {
                 check=false;
                 cout<<"\nError!!\n";
@@ -291,7 +282,63 @@ bool VerifyIntegrity::checkMapping(map<int,CustomLinkedQueue,greater<int> >buyBo
 
 bool VerifyIntegrity::checkExchange(Exchange &exchange)
 {
-    for(a)
+    bool overallcheck=true;
+    const unordered_map<string,OrderBook>&books=exchange.getBooks();
+    for(auto i:books)
+    {
+        cout<<"Verifying Integrity for : "<<i.second.getStockName()<<endl;
+        cout<<"\n";
+
+        cout<<"1. Checking Queue Integrity......\n";
+         map<int,CustomLinkedQueue,greater<int> >buyBook=i.second.getBuyBook();
+         map<int,CustomLinkedQueue >sellBook=i.second.getSellBook();
+
+        bool check=checkQueue(buyBook,sellBook);
+        if(check==true) cout<<"Queue Check:Passed\n";
+        else 
+        {
+        cout<<"Queue Check:Failed\n";
+        overallcheck=false;
+
+        }
+
+        cout<<"\n2. Checking Price Level Integrity......\n";
+        check=checkPriceLevels(buyBook,sellBook);
+        if(check==true) cout<<"Price Level Check:Passed\n";
+        else
+        { 
+            cout<<"Price Level Check:Failed\n";
+            overallcheck=false;
+        }
+
+        cout<<"\n3. Checking OrderBook Integrity......\n";
+        check=checkOrderBook(buyBook,sellBook,i.second.getBuyVolume(),i.second.getSellVolume(),i.second.getActiveBuyOrders(),i.second.getActiveSellOrders());
+        if(check==true) cout<<"Order Book Check:Passed\n";
+        else 
+        {
+            cout<<"Order Book Check:Failed\n";
+            overallcheck=false;
+
+        }
+
+        cout<<"\n4. Checking Id Mapping Integrity......\n";
+        check=checkMapping(buyBook,sellBook);
+        if(check==true) cout<<"Id Mapping Check:Passed\n";
+        else 
+        {
+        cout<<"Id Mapping Check:Failed\n";
+        overallcheck=false;
+
+        }
+
+
+
+
+
+
+
+    }
+    return overallcheck;
 }
 
 

@@ -7,9 +7,18 @@ enum class BuyOrSell{
     SELL
 };
 
+enum class OrderType{
+    LIMIT,
+    MARKET,
+    FOK,
+    IOC
+
+};
+
 struct Order{
     int orderId;
     BuyOrSell side;
+    OrderType type;
     string stockName;
     int price;
     int quantity;

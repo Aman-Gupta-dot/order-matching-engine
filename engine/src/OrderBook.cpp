@@ -1,6 +1,7 @@
 #include "../include/OrderBook.hpp"
 
 
+
 #include<iostream>
 #include<algorithm>
 #include<vector>
@@ -17,6 +18,7 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
    
         if(o.side==BuyOrSell::BUY)
             {
+                ordersReceived++;//stats
                 if(o.type==OrderType::LIMIT || o.type==OrderType::IOC)
                 {
                         //*add entry to buyBook
@@ -53,10 +55,11 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                             o.quantity-=tradingQuantity;//can't become -ve as min(o,oldest)
                             oldest.quantity-=tradingQuantity;
                             totalSellQuantities-=tradingQuantity;//For FOK orders
+                            pricelevelToquantityMappingForBuy[o.price] -= tradingQuantity;
 
                             //stats
                             totalTradedQuantity+=tradingQuantity;
-                            totalTradedValue+=trade.tradePrice;
+                            totalTradedValue+=trade.tradePrice*tradingQuantity;
                             
 
                             if(oldest.quantity==0)
@@ -87,7 +90,10 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
 
                         //stats
                         activeBuyOrders++;
-                        ordersReceived++;
+                        
+
+                        //data model
+                        pricelevelToquantityMappingForBuy[o.price]+=o.quantity;
                         
                     }
 
@@ -124,11 +130,12 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         //now update quantities
                         o.quantity-=tradingQuantity;
                         oldest.quantity-=tradingQuantity;
+                        pricelevelToquantityMappingForBuy[o.price] -= tradingQuantity;
                         totalSellQuantities-=tradingQuantity;//For FOK orders
 
                         //stats
                         totalTradedQuantity+=tradingQuantity;
-                        totalTradedValue+=trade.tradePrice;
+                        totalTradedValue+=trade.tradePrice*tradingQuantity;
                         
 
                         if(oldest.quantity==0)
@@ -228,11 +235,12 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         //now update quantities
                         o.quantity-=tradingQuantity;
                         oldest.quantity-=tradingQuantity;
+                        pricelevelToquantityMappingForBuy[o.price] -= tradingQuantity;
                         totalSellQuantities-=tradingQuantity;//For FOK orders
 
                         //stats
                         totalTradedQuantity+=tradingQuantity;
-                        totalTradedValue+=trade.tradePrice;
+                        totalTradedValue+=trade.tradePrice*tradingQuantity;
                         
 
                         if(oldest.quantity==0)
@@ -257,6 +265,7 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
             }
             else if(o.side==BuyOrSell::SELL)
             {
+                ordersReceived++;//stats
                 //now came a sell order, buy order resting
                 if(o.type==OrderType::LIMIT || o.type==OrderType::IOC)
                 {
@@ -292,11 +301,12 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
 
                                 oldestBuy.quantity-=trade.quantity;
                                 o.quantity-=trade.quantity;
+                                pricelevelToquantityMappingForSell[o.price] -= tradingQuantity;
                                 totalBuyQuantities-=tradingQuantity;//For FOK orders
 
                                 //stats
                                 totalTradedQuantity+=tradingQuantity;
-                                totalTradedValue+=trade.tradePrice;
+                                totalTradedValue+=trade.tradePrice*tradingQuantity;
                                 
 
                                 if(oldestBuy.quantity==0)
@@ -326,7 +336,11 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
 
                             //stats
                             activeSellOrders++;
-                            ordersReceived++;
+                            
+
+                            //data model
+
+                            pricelevelToquantityMappingForSell[o.price]+=o.quantity;
                             
                         }
 
@@ -363,11 +377,12 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         //now update quantities
                         o.quantity-=tradingQuantity;
                         oldest.quantity-=tradingQuantity;
+                        pricelevelToquantityMappingForSell[o.price] -= tradingQuantity;
                         totalBuyQuantities-=tradingQuantity;//For FOK orders
 
                         //stats
                         totalTradedQuantity+=tradingQuantity;
-                        totalTradedValue+=trade.tradePrice;
+                        totalTradedValue+=trade.tradePrice*tradingQuantity;
                         
 
                         if(oldest.quantity==0)
@@ -465,11 +480,12 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         //now update quantities
                         o.quantity-=tradingQuantity;
                         oldest.quantity-=tradingQuantity;
+                        pricelevelToquantityMappingForSell[o.price] -= tradingQuantity;
                         totalBuyQuantities-=tradingQuantity;//For FOK orders
 
                         //stats
                         totalTradedQuantity+=tradingQuantity;
-                        totalTradedValue+=trade.tradePrice;
+                        totalTradedValue+=trade.tradePrice*tradingQuantity;
                         
 
                         if(oldest.quantity==0)
@@ -498,7 +514,7 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
     return executedTrades;//to return vector of trades
 }
 
-void OrderBook::deleteOrder(int &oid,BuyOrSell side)
+int OrderBook::deleteOrder(int &oid,BuyOrSell side)
 {
 
     if(side==BuyOrSell::BUY)
@@ -506,12 +522,16 @@ void OrderBook::deleteOrder(int &oid,BuyOrSell side)
         if(idToOrderMappingForBuy.count(oid)==0)
         {
             cout<<"No such id in buy order book currently\n";
-            return;
+            return 0;
         }
         
        cout<<"cancelled oid : "<<oid<<endl;
        double toBeDeletedprice=idToOrderMappingForBuy[oid];
        totalBuyQuantities-=buyBook[toBeDeletedprice].getNodeForGivenId(oid)->order.quantity;//for stats also
+
+        //data model
+       pricelevelToquantityMappingForBuy[toBeDeletedprice]-=buyBook[toBeDeletedprice].getNodeForGivenId(oid)->order.quantity;
+
        buyBook[toBeDeletedprice].pop(oid);
        if(buyBook[toBeDeletedprice].isEmpty())
        {
@@ -523,17 +543,23 @@ void OrderBook::deleteOrder(int &oid,BuyOrSell side)
        activeBuyOrders--;
        ordersCancelled++;
 
+       return 1;
+
     }
     else
     {
          if(idToOrderMappingForSell.count(oid)==0)
         {
             cout<<"No such id in sell order book currently\n";
-            return;
+            return 0;
         }
         
        cout<<"cancelled oid : "<<oid<<endl;
        double toBeDeletedprice=idToOrderMappingForSell[oid];
+
+        //data model
+       pricelevelToquantityMappingForSell[toBeDeletedprice]-=sellBook[toBeDeletedprice].getNodeForGivenId(oid)->order.quantity;
+
        totalSellQuantities-=sellBook[toBeDeletedprice].getNodeForGivenId(oid)->order.quantity;//also for stats
        sellBook[toBeDeletedprice].pop(oid);
        if(sellBook[toBeDeletedprice].isEmpty())
@@ -544,6 +570,8 @@ void OrderBook::deleteOrder(int &oid,BuyOrSell side)
        //stats
        activeSellOrders--;   
        ordersCancelled++;
+
+       return 1;
     }
 }
 
@@ -626,35 +654,35 @@ void OrderBook::setVerbose(bool value)
 {
     verbose=value;
 }
-int OrderBook::getTradesExecuted()
+int OrderBook::getTradesExecuted() const
 {
     return trades.size();
 }
-int OrderBook::getTradedQuantity()
+int OrderBook::getTradedQuantity() const
 {
     return totalTradedQuantity;
 }
-int OrderBook::getTradedValue()
+int OrderBook::getTradedValue() const
 {
     return totalTradedValue;
 }
-int OrderBook::getActiveBuyOrders()
+int OrderBook::getActiveBuyOrders() const
 {
     return activeBuyOrders;
 }
-int OrderBook::getActiveSellOrders()
+int OrderBook::getActiveSellOrders() const
 {
     return activeSellOrders;
 }
-int OrderBook::getBuyVolume()
+int OrderBook::getBuyVolume() const
 {
     return totalBuyQuantities;
 }
-int OrderBook::getSellVolume()
+int OrderBook::getSellVolume() const
 {
     return totalSellQuantities;
 }
-int OrderBook::getBestBid()
+int OrderBook::getBestBid() const
 {
     if(buyBook.empty())
     {
@@ -666,7 +694,7 @@ int OrderBook::getBestBid()
         return bestBuy->second.start().price;//highest buy price in order book
     }
 }
-int OrderBook::getBestAsk()
+int OrderBook::getBestAsk() const
 {
     if(sellBook.empty())
     {
@@ -678,11 +706,83 @@ int OrderBook::getBestAsk()
         return bestSell->second.start().price;//lowest sell price in order book
     }
 }
-int OrderBook::getOrdersReceived()
+int OrderBook::getOrdersReceived() const
 {
     return ordersReceived;
 }
-int OrderBook::getOrdersCancelled()
+int OrderBook::getOrdersCancelled() const
 {
     return ordersCancelled;
+}
+
+//verify Integrity
+map<int,CustomLinkedQueue,greater<int> > OrderBook::getBuyBook()const{
+    return buyBook;
+}
+
+map<int,CustomLinkedQueue > OrderBook::getSellBook()const{
+    return sellBook;
+}
+
+//model data
+OrderBookSnapshot OrderBook::getOrderBook() const{
+    OrderBookSnapshot Obs;
+    Obs.stockName=stockName;
+    Obs.bestAsk=this->getBestAsk();
+    Obs.bestBid=this->getBestBid();
+    for(auto i:buyBook)
+    {
+        //each i is pricetoCustomQ mapping
+        //this price must lie in price to its qty mapping
+        int price=i.first;
+        int totalQuantity=pricelevelToquantityMappingForBuy.at(price);
+        
+        PriceLevel Pl;
+        Pl.priceLevel=price;
+        Pl.quantity=totalQuantity;
+        Obs.buyLevels.push_back(Pl);
+        
+
+        
+    }
+    for(auto i:sellBook)
+    {
+        //each i is pricetoCustomQ mapping
+        //this price must lie in price to its qty mapping
+        int price=i.first;
+        int totalQuantity=pricelevelToquantityMappingForSell.at(price);
+        
+        PriceLevel Pl;
+        Pl.priceLevel=price;
+        Pl.quantity=totalQuantity;
+        
+        Obs.sellLevels.push_back(Pl);
+        
+
+        
+    }
+    return Obs;
+}
+TradeBook OrderBook::getTradeBook() const{
+    TradeBook tb;
+    
+    tb.totalTrades=trades.size();
+    tb.Trades=trades;
+    return tb;
+}
+
+StatisticsBook OrderBook::getStatisticsBook()const{
+    StatisticsBook sb;
+    sb.totalTrades=trades.size();
+    sb.activeBuyOrders=activeBuyOrders;
+    sb.activeSellOrders=activeSellOrders;
+    sb.bestAsk=this->getBestAsk();
+    sb.bestBid=this->getBestBid();
+    sb.buyVolume=totalBuyQuantities;
+    sb.ordersCancelled=ordersCancelled;
+    sb.ordersReceived=ordersReceived;
+    sb.sellVolume=totalSellQuantities;
+    sb.totalTradedQuantity=totalTradedQuantity;
+    sb.totalTradedValue=totalTradedValue;
+    return sb;
 }
