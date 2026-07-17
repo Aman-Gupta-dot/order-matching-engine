@@ -19,7 +19,7 @@ void ApiServer::start()
     // crow::SimpleApp App;//we have CORS MIDDLEWARE IN OUR CROW
     crow::App<crow::CORSHandler>App;
 
-    App.get_middleware<crow::CORSHandler>().global().origin("http://localhost:5173")
+    App.get_middleware<crow::CORSHandler>().global().origin("*")
     .methods(crow::HTTPMethod::GET,
             crow::HTTPMethod::POST,
             crow::HTTPMethod::OPTIONS).headers("Content-Type");
