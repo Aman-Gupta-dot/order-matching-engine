@@ -7,6 +7,7 @@
 
 #include "../BackendServerFiles/Crow/include/crow/middlewares/cors.h"
 
+#include<cstdlib>
 
 
 ApiServer::ApiServer(Exchange *exchange)
@@ -249,6 +250,9 @@ void ApiServer::start()
         
     });
     
-    App.port(18000).multithreaded().run();
+    const char* envPort=getenv("PORT");//give pointer to port in the running environment if exist if not then nUL
+    int port= envPort?stoi(envPort):18000;
+    App.port(port).multithreaded().run();
+
 
 }
