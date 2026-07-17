@@ -4,11 +4,12 @@
 #include<chrono>
 #include "../include/Exchange.hpp"
 #include "../include/VerifyIntegrity.hpp"
+#include "stressTest.hpp"
 using namespace std;
 
-void stressTest(int &overallOrderId,int &overalltimeStamp,Exchange &exchange)
+void stressTest::doStressTest(int numOrders,int &overallOrderId,int &overalltimeStamp,Exchange &exchange)
 {
-    for(int i=1;i<=100000;i++)
+    for(int i=1;i<=numOrders;i++)
     {
        
         Order order;

@@ -5,13 +5,26 @@
 #include "../engine/include/StatisticsBook.hpp"
 #include "../engine/include/Order.hpp"
 
+#include "../BackendServerFiles/Crow/include/crow/middlewares/cors.h"
+
 ApiServer::ApiServer(Exchange *exchange)
 {
     this->exchange=exchange;
 }
 void ApiServer::start()
 {
-    crow::SimpleApp App;
+    // crow::SimpleApp App;//we have CORS MIDDLEWARE IN OUR CROW
+    crow::App<crow::CORSHandler>App;
+
+    App.get_middleware<crow::CORSHandler>().global().origin("http://localhost:5173")
+    .methods(crow::HTTPMethod::GET,
+            crow::HTTPMethod::POST,
+            crow::HTTPMethod::OPTIONS).headers("Content-Type");
+
+
+
+
+
     CROW_ROUTE(App,"/")
     ([](){
         return "Welcome to our Order Matching Engine";
@@ -49,6 +62,8 @@ void ApiServer::start()
 
         }
         response["sellLevels"]=move(jsonArr2);
+
+       
 
         return response;
 
@@ -104,8 +119,9 @@ void ApiServer::start()
 
         return response;
     });
+     
 
-    CROW_ROUTE(App,"/placeOrder").methods(crow::HTTPMethod::Post)
+    CROW_ROUTE(App,"/placeOrder").methods(crow::HTTPMethod::POST)
     ([this](const crow::request &req){
         auto body=crow::json::load(req.body);
 
@@ -133,9 +149,7 @@ void ApiServer::start()
         {
             sideEnum=BuyOrSell::SELL;
         }
-        else{
-            return crow::response(400,"Bad Request Side not Known");
-        }
+        
 
         order.side=sideEnum;
 
@@ -156,9 +170,7 @@ void ApiServer::start()
         {
             typeEnum=OrderType::IOC;
         }
-        else{
-            return crow::response(400,"Bad Request TYPE not Known");
-        }
+        
 
         order.type=typeEnum;
         
@@ -168,12 +180,13 @@ void ApiServer::start()
 
         response["status"]="Success";
         response["msg"]="Order Placed Succesfully";
-
         return crow::response(response);
    
     });
 
-    CROW_ROUTE(App,"/cancelOrder").methods(crow::HTTPMethod::Post)
+   
+
+    CROW_ROUTE(App,"/cancelOrder").methods(crow::HTTPMethod::POST)
     ([this](const crow::request &req){
         auto body=crow::json::load(req.body);
 
@@ -192,9 +205,6 @@ void ApiServer::start()
         else if(side=="SELL" || side=="sell")
         {
             sideEnum=BuyOrSell::SELL;
-        }
-        else{
-            return crow::response(400,"Bad Request Side not Known");
         }
         int OrderExist=this->exchange->cancelOrder(orderId,stockName,sideEnum);
         crow::json::wvalue response;
@@ -215,6 +225,11 @@ void ApiServer::start()
 
         
     });
+    CROW_ROUTE(App,"/stressTest/<int>")
+    ([](int testOrders){
+
+    });
+    
     App.port(18000).multithreaded().run();
 
 }
