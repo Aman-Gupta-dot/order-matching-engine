@@ -1,6 +1,8 @@
 #pragma once
 #include "OrderBook.hpp"
 #include "ExchangeStatistics.hpp"
+#include "../tests/stressTest.hpp"
+#include "VerifyIntegrity.hpp"
 #include<unordered_map>
 using namespace std;
 class Exchange{
@@ -22,4 +24,7 @@ class Exchange{
         OrderBookSnapshot getOrderBook(string &stockname)const;
         TradeBook getTradeBook(string &stockName)const;
         StatisticsBook getStatisticsBook(string &stockName)const;
+
+        int performStressTest(int randomOrders,Exchange *exchange);
+        
 };

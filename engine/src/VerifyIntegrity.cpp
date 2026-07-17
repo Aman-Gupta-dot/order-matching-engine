@@ -1,6 +1,7 @@
 #include<iostream>
 using namespace std;
 #include "../include/VerifyIntegrity.hpp"
+#include "../include/Exchange.hpp"
 
 bool VerifyIntegrity::checkQueue(map<int,CustomLinkedQueue,greater<int> >&buyBook,map<int,CustomLinkedQueue >&sellBook)
 {
@@ -280,53 +281,49 @@ bool VerifyIntegrity::checkMapping(map<int,CustomLinkedQueue,greater<int> >&buyB
     return check;
 }
 
-bool VerifyIntegrity::checkExchange(Exchange &exchange)
+int VerifyIntegrity::checkExchange(Exchange *exchange)
 {
-    bool overallcheck=true;
-    const unordered_map<string,OrderBook>&books=exchange.getBooks();
+    int overallcheck=1;
+    const unordered_map<string,OrderBook>&books=exchange->getBooks();
     for(auto i:books)
     {
-        cout<<"Verifying Integrity for : "<<i.second.getStockName()<<endl;
-        cout<<"\n";
+        // cout<<"Verifying Integrity for : "<<i.second.getStockName()<<endl;
+        // cout<<"\n";
 
-        cout<<"1. Checking Queue Integrity......\n";
+        // cout<<"1. Checking Queue Integrity......\n";
          map<int,CustomLinkedQueue,greater<int> >buyBook=i.second.getBuyBook();
          map<int,CustomLinkedQueue >sellBook=i.second.getSellBook();
 
         bool check=checkQueue(buyBook,sellBook);
-        if(check==true) cout<<"Queue Check:Passed\n";
-        else 
+        if(check!=true) 
         {
-        cout<<"Queue Check:Failed\n";
+        // cout<<"Queue Check:Failed\n";
         overallcheck=false;
 
         }
 
-        cout<<"\n2. Checking Price Level Integrity......\n";
+        // cout<<"\n2. Checking Price Level Integrity......\n";
         check=checkPriceLevels(buyBook,sellBook);
-        if(check==true) cout<<"Price Level Check:Passed\n";
-        else
+        if(check!=true)
         { 
-            cout<<"Price Level Check:Failed\n";
+            // cout<<"Price Level Check:Failed\n";
             overallcheck=false;
         }
 
-        cout<<"\n3. Checking OrderBook Integrity......\n";
+        
         check=checkOrderBook(buyBook,sellBook,i.second.getBuyVolume(),i.second.getSellVolume(),i.second.getActiveBuyOrders(),i.second.getActiveSellOrders());
-        if(check==true) cout<<"Order Book Check:Passed\n";
-        else 
+        if(check!=true)
         {
-            cout<<"Order Book Check:Failed\n";
+            // cout<<"Order Book Check:Failed\n";
             overallcheck=false;
 
         }
 
-        cout<<"\n4. Checking Id Mapping Integrity......\n";
+        
         check=checkMapping(buyBook,sellBook);
-        if(check==true) cout<<"Id Mapping Check:Passed\n";
-        else 
+        if(check!=true) 
         {
-        cout<<"Id Mapping Check:Failed\n";
+        // cout<<"Id Mapping Check:Failed\n";
         overallcheck=false;
 
         }

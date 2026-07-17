@@ -4,7 +4,7 @@
 
 int main()
 {
-    Exchange exchange(true);//exchange created
+    Exchange exchange(false);//exchange created
     ApiServer server(&exchange);//server created
     server.start();//server started
     

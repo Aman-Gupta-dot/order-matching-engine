@@ -6,6 +6,7 @@ import OrderBook from "./OrderBook.jsx"
 import Trades from "./Trades.jsx"
 import Statistics from "./Statistics.jsx"
 import CancelOrderForm from "./CancelOrderForm.jsx"
+import StressTestSelector from "./StressTestSelector.jsx"
 
 import { useState } from "react"
 
@@ -21,6 +22,9 @@ function App() {
   const[statsResponseData,setStatsResponseData]=useState(null);
 
   const[cancelOrderResponse,setCancelOrderResponse]=useState(null);
+
+  const[stressResponse,setStressResponse]=useState(null);
+  const[showStressTestResult,setShowStressTestResult]=useState(null);
 
 
   async function loadData()
@@ -54,6 +58,7 @@ function App() {
     const data=await response.json();
     setTradeBookData(data);
     setShowTradeBook(true);
+    
   }
 
   async function loadStatistics()
@@ -78,6 +83,16 @@ function App() {
     setCancelOrderResponse(data);
   }
 
+  async function performStressTest(numberOfOrders)
+  {
+    const response=await fetch(`http://localhost:18000/stressTest/${numberOfOrders}`);
+    const data=await response.json();
+    setStressResponse(data);
+    setShowStressTestResult(true);
+
+
+  }
+
   
 
   return (
@@ -89,7 +104,7 @@ function App() {
       <OrderBook showOrderBook={showOrderBook} loadData={loadData} OrderBookData={OrderBookData}/>
       <Trades showTradeBook={showTradeBook} tradeBookData={tradeBookData} loadTrades={loadTrades}/>
       <Statistics loadStatistics={loadStatistics} showStatistics={showStatistics} statsResponseData={statsResponseData}/>
-
+      <StressTestSelector performStressTest={performStressTest} stressResponse={stressResponse} showStressTestResult={showStressTestResult}/>
     </>
   )
 }

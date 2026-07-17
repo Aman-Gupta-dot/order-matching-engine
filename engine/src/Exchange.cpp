@@ -18,13 +18,7 @@ Exchange::Exchange(bool value)
 
 void Exchange::placeOrder(Order order)
 {
-    cout << "Exchange::placeOrder() called\n";
-cout << "Searching for [" << order.stockName << "]\n";
-
-for (const auto &x : books)
-{
-    cout << "Book : [" << x.first << "]\n";
-}
+    
     auto it = books.find(order.stockName);
 
     if(it == books.end())
@@ -164,5 +158,20 @@ StatisticsBook Exchange::getStatisticsBook(string &stockName)const
     return it->second.getStatisticsBook();
 
 }
+
+int Exchange::performStressTest(int randomOrders,Exchange *exchange){
+    if(randomOrders<0 || randomOrders>1000000)
+    {
+        cout<<"random orders out of range\n";
+        return 10;
+    }
+    stressTest tester;
+    tester.doStressTest(randomOrders,orderId,timestamp,exchange);
+    VerifyIntegrity verifier;
+    int result=verifier.checkExchange(exchange);
+
+    return result;
+}
+
 
 

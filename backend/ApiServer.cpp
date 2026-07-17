@@ -7,6 +7,8 @@
 
 #include "../BackendServerFiles/Crow/include/crow/middlewares/cors.h"
 
+
+
 ApiServer::ApiServer(Exchange *exchange)
 {
     this->exchange=exchange;
@@ -226,8 +228,25 @@ void ApiServer::start()
         
     });
     CROW_ROUTE(App,"/stressTest/<int>")
-    ([](int testOrders){
+    ([this](int testOrders){
+        int result=this->exchange->performStressTest(testOrders,exchange);
+        crow::json::wvalue response;
+        if(result==1)
+        {
+            response["IntegrityStatus"]="passed";
 
+        }
+        else if(result==0)
+        {
+            response["IntegrityStatus"]="failed";
+        }
+        else if(result==10)
+        {
+            response["IntegrityStatus"]="    ";
+            response["msg"]="plz enter a no in range 1-1000000";
+        }
+        return response;
+        
     });
     
     App.port(18000).multithreaded().run();

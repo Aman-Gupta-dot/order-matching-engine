@@ -1,9 +1,11 @@
 #pragma once
-#include "../include/Exchange.hpp"
+class Exchange;
 class stressTest{
     public:
-        stressTest();
-        void doStressTest(int randomOrders,int &overallOrderId,int &overalltimeStamp,Exchange &exchange);
+
+        
+        void doStressTest(int randomOrders,int &overallOrderId,int &overalltimeStamp,Exchange *exchange);
+        void stressCancellationTest(int randomOrders,int &overallOrderId,int &overalltimeStamp,Exchange *exchange);
 
 
 

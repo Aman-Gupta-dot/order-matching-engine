@@ -1,13 +1,14 @@
 #include<iostream>
 #include<cstdlib>//for rand() and srand()
-#include<ctime>//for seed to srand()
+
 #include<chrono>
+#include "../include/Order.hpp"
 #include "../include/Exchange.hpp"
-#include "../include/VerifyIntegrity.hpp"
+
 #include "stressTest.hpp"
 using namespace std;
 
-void stressTest::doStressTest(int numOrders,int &overallOrderId,int &overalltimeStamp,Exchange &exchange)
+void stressTest::doStressTest(int numOrders,int &overallOrderId,int &overalltimeStamp,Exchange *exchange)
 {
     for(int i=1;i<=numOrders;i++)
     {
@@ -17,19 +18,19 @@ void stressTest::doStressTest(int numOrders,int &overallOrderId,int &overalltime
         
         if(randomStockNumber==1)
         {
-            order.stockName="Dairy Milk";
+            order.stockName="DairyMilk";
         }
         else if(randomStockNumber==2)
         {
-            order.stockName="5 Star";
+            order.stockName="5Star";
         }
         else if(randomStockNumber==3)
         {
-            order.stockName="Ferrero Rocher";
+            order.stockName="FerreroRocher";
         }
         else if(randomStockNumber==4)
         {
-            order.stockName="Kinder Joy";
+            order.stockName="KinderJoy";
         }
 
        
@@ -72,13 +73,13 @@ void stressTest::doStressTest(int numOrders,int &overallOrderId,int &overalltime
         }
         
         
-        exchange.placeOrder(order);
+        exchange->placeOrder(order);
   }
 }
 
-void stressCancellationTest(int &overallOrderId,int &overalltimeStamp,Exchange &exchange)
+void stressTest::stressCancellationTest(int randomOrders,int &overallOrderId,int &overalltimeStamp,Exchange *exchange)
 {
-    for(int i=1;i<1000;i++)
+    for(int i=1;i<randomOrders;i++)
     {
         Order order;
     order.type=OrderType::LIMIT;
@@ -103,7 +104,7 @@ void stressCancellationTest(int &overallOrderId,int &overalltimeStamp,Exchange &
         
         if(randomStockNumber==1)
         {
-            order.stockName="Dairy Milk";
+            order.stockName="DairyMilk";
         }
         else if(randomStockNumber==2)
         {
@@ -111,82 +112,22 @@ void stressCancellationTest(int &overallOrderId,int &overalltimeStamp,Exchange &
         }
         else if(randomStockNumber==3)
         {
-            order.stockName="Ferrero Rocher";
+            order.stockName="FerreroRocher";
         }
         else if(randomStockNumber==4)
         {
-            order.stockName="Kinder Joy";
+            order.stockName="KinderJoy";
         }
         //this way order will never match
-        exchange.placeOrder(order);
+        exchange->placeOrder(order);
 
         if(i%10==0)
         {
             int randomid=100+rand()%(overallOrderId-100+1);
-            exchange.cancelOrder(randomid,order.stockName,order.side);
+            exchange->cancelOrder(randomid,order.stockName,order.side);
         }
 
         
         
     }
-}
-int main()
-{
-  int overallOrderId=100;
-  int overalltimeStamp=0;
-  
-  Exchange exchange(false);
-  srand(time(0));
-
-//   auto start=chrono::high_resolution_clock::now();
-//   stressTest(overallOrderId,overalltimeStamp,exchange); 
-//   auto end=chrono::high_resolution_clock::now();
-
-//  auto executionTime=(chrono::duration_cast<chrono::milliseconds>)(end-start);
-//  cout<<executionTime.count()<<"milli seconds";
-// string stock="Dairy Milk";
-//  exchange.viewOrderBook(stock);
-
-//   exchange.showTrades(stock);
-//  cout<<endl;
-//  exchange.viewOrderBook(stock);
-//  cout<<endl;
-
-//  exchange.showStatistics(stock);
-
-//  VerifyIntegrity verifier;
-//  bool result=verifier.checkExchange(exchange);
-//  cout<<"\n";
-//  cout<<"\n Congratulations!! Your Order engine holds complete integrity among all its operations\n";
-//  cout<<"\n";
-
-
-
- //phase 1:random order generation(done)
- //now we'll include random cancellations but the problem is-->how to find that random id
-//  (it might be executed),(it might be cancelled before),(our function has 3 parameters 
-//  which are all randomly decided so the probability of such a event happening is very tiny-->
-// almost negligible)
-
-//so we'll create a second fn to test stress cancellation
-stressCancellationTest(overallOrderId,overalltimeStamp,exchange);
-
- string stock="Dairy Milk";
- exchange.viewOrderBook(stock);
-
-  exchange.showTrades(stock);
- cout<<endl;
- exchange.viewOrderBook(stock);
- cout<<endl;
-
- exchange.showStatistics(stock);
- VerifyIntegrity verifier;
- bool result=verifier.checkExchange(exchange);
- cout<<"\n";
- cout<<"\n Congratulations!! Your Order engine holds complete integrity among all its operations\n";
- cout<<"\n";
-  
-
-  
-    return 0;
 }
