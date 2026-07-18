@@ -55,7 +55,14 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                             o.quantity-=tradingQuantity;//can't become -ve as min(o,oldest)
                             oldest.quantity-=tradingQuantity;
                             totalSellQuantities-=tradingQuantity;//For FOK orders
-                            pricelevelToquantityMappingForSell[o.price] -= tradingQuantity;
+                            if(pricelevelToquantityMappingForSell[oldest.price]==0)
+                            {
+                                pricelevelToquantityMappingForSell.erase(oldest.price);
+                            }
+                            else
+                            {
+                                pricelevelToquantityMappingForSell[oldest.price] -= tradingQuantity;
+                            }
 
                             //stats
                             totalTradedQuantity+=tradingQuantity;
@@ -130,7 +137,14 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         //now update quantities
                         o.quantity-=tradingQuantity;
                         oldest.quantity-=tradingQuantity;
-                        pricelevelToquantityMappingForSell[o.price] -= tradingQuantity;
+                         if(pricelevelToquantityMappingForSell[oldest.price]==0)
+                            {
+                                pricelevelToquantityMappingForSell.erase(oldest.price);
+                            }
+                            else
+                            {
+                                pricelevelToquantityMappingForSell[oldest.price] -= tradingQuantity;
+                            }
                         totalSellQuantities-=tradingQuantity;//For FOK orders
 
                         //stats
@@ -235,7 +249,14 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         //now update quantities
                         o.quantity-=tradingQuantity;
                         oldest.quantity-=tradingQuantity;
-                        pricelevelToquantityMappingForSell[o.price] -= tradingQuantity;
+                            if(pricelevelToquantityMappingForSell[oldest.price]==0)
+                            {
+                                pricelevelToquantityMappingForSell.erase(oldest.price);
+                            }
+                            else
+                            {
+                                pricelevelToquantityMappingForSell[oldest.price] -= tradingQuantity;
+                            }
                         totalSellQuantities-=tradingQuantity;//For FOK orders
 
                         //stats
@@ -301,7 +322,14 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
 
                                 oldestBuy.quantity-=trade.quantity;
                                 o.quantity-=trade.quantity;
-                                pricelevelToquantityMappingForBuy[o.price] -= tradingQuantity;
+                                if(pricelevelToquantityMappingForBuy[oldestBuy.price]==0)
+                                {
+                                    pricelevelToquantityMappingForBuy.erase(oldestBuy.price);
+                                }
+                                else
+                                {
+                                    pricelevelToquantityMappingForBuy[oldestBuy.price] -= tradingQuantity;
+                                }
                                 totalBuyQuantities-=tradingQuantity;//For FOK orders
 
                                 //stats
@@ -377,7 +405,14 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         //now update quantities
                         o.quantity-=tradingQuantity;
                         oldest.quantity-=tradingQuantity;
-                        pricelevelToquantityMappingForBuy[o.price] -= tradingQuantity;
+                                if(pricelevelToquantityMappingForBuy[oldest.price]==0)
+                                {
+                                    pricelevelToquantityMappingForBuy.erase(oldest.price);
+                                }
+                                else
+                                {
+                                    pricelevelToquantityMappingForBuy[oldest.price] -= tradingQuantity;
+                                }
                         totalBuyQuantities-=tradingQuantity;//For FOK orders
 
                         //stats
@@ -480,7 +515,14 @@ vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many
                         //now update quantities
                         o.quantity-=tradingQuantity;
                         oldest.quantity-=tradingQuantity;
-                        pricelevelToquantityMappingForBuy[o.price] -= tradingQuantity;
+                                if(pricelevelToquantityMappingForBuy[oldest.price]==0)
+                                {
+                                    pricelevelToquantityMappingForBuy.erase(oldest.price);
+                                }
+                                else
+                                {
+                                    pricelevelToquantityMappingForBuy[oldest.price] -= tradingQuantity;
+                                }
                         totalBuyQuantities-=tradingQuantity;//For FOK orders
 
                         //stats

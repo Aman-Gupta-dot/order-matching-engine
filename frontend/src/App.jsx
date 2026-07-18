@@ -1,17 +1,13 @@
-import Header from "./Header.jsx"
-import StockSelector from "./StockSelector.jsx"
-import OrderForm from "./OrderForm.jsx"
-import OrderBook from "./OrderBook.jsx"
-
-import Trades from "./Trades.jsx"
-import Statistics from "./Statistics.jsx"
-import CancelOrderForm from "./CancelOrderForm.jsx"
-import StressTestSelector from "./StressTestSelector.jsx"
-
-import { useState } from "react"
-
+import Card from "./components/Card.jsx"
+import Header from "./Header.jsx";
+import OrderBook from "./OrderBook.jsx";
+import OrderForm from "./OrderForm.jsx";
+import Statistics from "./Statistics.jsx";
+import { useState } from "react";
 function App() {
-  const [showOrderBook,setShowOrderBook]=useState(false);
+
+
+   const [showOrderBook,setShowOrderBook]=useState(false);
   const [showTradeBook,setShowTradeBook]=useState(false);
   const [OrderBookData,setOrderBookData]=useState(null);
   const [tradeBookData,setTradeBookData]=useState(null);
@@ -92,19 +88,42 @@ function App() {
 
 
   }
-
-  
-
-  return (
+  return(
     <>
-      <Header />
-      <StockSelector selectedStock={selectedStock} setSelectedStock={setSelectedStock}/>
-      <OrderForm placeOrder={placeOrder} selectedStock={selectedStock} placeOrderResponse={placeOrderResponse}/>
-      <CancelOrderForm selectedStock={selectedStock} cancelOrderResponse={cancelOrderResponse} cancelOrder={cancelOrder}/>
-      <OrderBook showOrderBook={showOrderBook} loadData={loadData} OrderBookData={OrderBookData}/>
-      <Trades showTradeBook={showTradeBook} tradeBookData={tradeBookData} loadTrades={loadTrades}/>
-      <Statistics loadStatistics={loadStatistics} showStatistics={showStatistics} statsResponseData={statsResponseData}/>
-      <StressTestSelector performStressTest={performStressTest} stressResponse={stressResponse} showStressTestResult={showStressTestResult}/>
+        <div className="min-h-screen bg-[#0B061B]">
+          <Header />
+            <div className="grid grid-cols-3 gap-2 p-4 mx-2 my-2">
+              <Card>
+                <h1 className="place-self-center text-2xl absolute">Order Entry</h1>
+                
+                <OrderForm placeOrder={placeOrder} selectedStock={selectedStock} placeOrderResponse={placeOrderResponse}/>
+              </Card>
+              <Card>
+                <h1 className="place-self-center text-2xl">Order Book</h1>
+                <OrderBook showOrderBook={showOrderBook} loadData={loadData} OrderBookData={OrderBookData}/>
+              </Card>
+              <Card>
+                <h1 className="place-self-center text-2xl">Statistics</h1>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 p-4 mx-2 my-2">
+              <Card>
+                <h1 className="place-self-center text-2xl">Recent Trades</h1>
+              </Card>
+              <Card>
+                  <h1 className="place-self-center text-2xl">Market Simulator</h1>
+              </Card>
+            </div>
+            <div className="p-4 mx-2 my-2 ">
+              <Card>
+                    <h1 className="place-self-center text-2xl">Cancel Order</h1>
+              </Card>
+             
+            </div>
+
+          
+        </div>
     </>
   )
 }

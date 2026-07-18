@@ -84,7 +84,7 @@ void stressTest::stressCancellationTest(int randomOrders,int &overallOrderId,int
         Order order;
     order.type=OrderType::LIMIT;
     order.orderId=++overallOrderId;
-    order.timeStamp=overalltimeStamp;
+    order.timeStamp=++overalltimeStamp;
 
     int randomSide=rand()%2+1;
         if(randomSide==1)
@@ -108,7 +108,7 @@ void stressTest::stressCancellationTest(int randomOrders,int &overallOrderId,int
         }
         else if(randomStockNumber==2)
         {
-            order.stockName="5 Star";
+            order.stockName="5Star";
         }
         else if(randomStockNumber==3)
         {
