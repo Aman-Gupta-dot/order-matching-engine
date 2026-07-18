@@ -23,7 +23,7 @@ function App() {
       <CancelOrderForm selectedStock={selectedStock} cancelOrderResponse={cancelOrderResponse} cancelOrder={cancelOrder}/>
       
       <Trades showTradeBook={showTradeBook} tradeBookData={tradeBookData} loadTrades={loadTrades}/>
-      <Statistics loadStatistics={loadStatistics} showStatistics={showStatistics} statsResponseData={statsResponseData}/>
+      
       <StressTestSelector performStressTest={performStressTest} stressResponse={stressResponse} showStressTestResult={showStressTestResult}/>
     </>
   )

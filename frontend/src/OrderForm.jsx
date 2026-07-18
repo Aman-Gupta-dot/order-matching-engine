@@ -125,7 +125,7 @@ function OrderForm({placeOrder,selectedStock,placeOrderResponse}){
             </div>
 
             <div>
-                <h1>{placeOrderResponse.msg}</h1>
+                <h1>{ placeOrderResponse!=null && placeOrderResponse.msg}</h1>
             </div>
            
         </div> 

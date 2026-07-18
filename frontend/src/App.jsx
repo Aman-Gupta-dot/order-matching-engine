@@ -45,6 +45,7 @@ function App() {
     })
     const data=await response.json();
     setPlaceOrderResponse(data);
+    loadData();
 
   }
 
@@ -104,6 +105,7 @@ function App() {
               </Card>
               <Card>
                 <h1 className="place-self-center text-2xl">Statistics</h1>
+                <Statistics loadStatistics={loadStatistics} showStatistics={showStatistics} statsResponseData={statsResponseData}/>
               </Card>
             </div>
 

@@ -1,11 +1,12 @@
 function OrderBook({showOrderBook,loadData,OrderBookData}){
     return (
         <>
-        <div className="OrderBookContainer">
+        <div className="flex gap-5 justify-between">
             
                 <table>
                     <thead>
-                        <tr className="flex gap-5 text-xl">
+                        <h1>BUY</h1>
+                        <tr className="flex gap-3 text-xl">
                             <th>Price</th>
                             <th>Quantity</th>
                         </tr>
@@ -26,7 +27,33 @@ function OrderBook({showOrderBook,loadData,OrderBookData}){
                     
                     </tbody>
                     
-            </table>        
+            </table>
+            <table>
+                    
+                    <thead>
+                        <h1>SELL</h1>
+                        <tr className="flex gap-3 text-xl">
+                            <th>Price</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    
+                    {
+                            OrderBookData!=null &&
+                            OrderBookData.sellLevels.map((priceAndQty)=>{
+                                return(
+                                    <tr>
+                                        <td>{priceAndQty.priceLevel}</td>
+                                        <td>{priceAndQty.totalQuantity}</td>
+                                    </tr>
+                                )
+                            })
+                    }
+                    
+                    </tbody>
+                    
+            </table>      
             
         </div>
         </>
