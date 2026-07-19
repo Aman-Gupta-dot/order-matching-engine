@@ -77,7 +77,7 @@ void stressTest::doStressTest(int numOrders,int &overallOrderId,int &overalltime
   }
 }
 
-void stressTest::stressCancellationTest(int randomOrders,int &overallOrderId,int &overalltimeStamp,Exchange *exchange)
+void stressTest::doStressCancellationTest(int randomOrders,int &overallOrderId,int &overalltimeStamp,Exchange *exchange)
 {
     for(int i=1;i<randomOrders;i++)
     {

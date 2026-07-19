@@ -8,6 +8,8 @@
 #include "../BackendServerFiles/Crow/include/crow/middlewares/cors.h"
 
 #include<cstdlib>
+#include<chrono>
+
 
 
 ApiServer::ApiServer(Exchange *exchange)
@@ -80,7 +82,10 @@ void ApiServer::start()
 
         response["totalTrades"]=Tb.totalTrades;
         crow::json::wvalue::list jsonArrTrades;
-        for(int i=0;i<Tb.Trades.size();i++)
+
+        int size=Tb.Trades.size();
+        int itemsToShow = min(size,5);
+        for(int i=size-1;i>size-itemsToShow;i--)
         {
             crow::json::wvalue jsonObject;
 
@@ -220,7 +225,7 @@ void ApiServer::start()
         }
         else
         {
-            response["msg"]="OrderId not exist for this side or stock not recognized";
+            response["msg"]="OrderId for the given side does not exist";
         }
 
         return crow::response(response);
@@ -230,10 +235,47 @@ void ApiServer::start()
     });
     CROW_ROUTE(App,"/stressTest/<int>")
     ([this](int testOrders){
+        auto start=chrono::high_resolution_clock::now();
         int result=this->exchange->performStressTest(testOrders,exchange);
+        auto end=chrono::high_resolution_clock::now();
+
+        int duration=chrono::duration_cast<chrono::microseconds>(end-start).count();
+
         crow::json::wvalue response;
         if(result==1)
         {
+            response["duration"]=duration;
+            response["IntegrityStatus"]="passed";
+            response["msg"]="success";
+
+        }
+        else if(result==0)
+        {
+            response["IntegrityStatus"]="failed";
+            response["msg"]="failed";
+            
+        }
+        else if(result==10)
+        {
+            response["IntegrityStatus"]="    ";
+            response["msg"]="plz enter a no in range 1-1000000";
+        }
+        return response;
+        
+    });
+
+    CROW_ROUTE(App,"/stressCancellationTest/<int>")
+    ([this](int testOrders){
+        auto start=chrono::high_resolution_clock::now();
+        int result=this->exchange->performStressCancellation(testOrders,exchange);
+        auto end=chrono::high_resolution_clock::now();
+
+        double duration=chrono::duration_cast<chrono::microseconds>(end-start).count();
+
+        crow::json::wvalue response;
+        if(result==1)
+        {
+            response["duration"]=duration;
             response["IntegrityStatus"]="passed";
 
         }

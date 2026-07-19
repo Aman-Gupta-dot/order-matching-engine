@@ -3,22 +3,11 @@ import React from "react";
 function Statistics({ loadStatistics, showStatistics, statsResponseData }) {
     return (
         <>
-            <div>
-                <div>
-                    <button 
-                        className="flex items-center justify-center gap-2 border border-slate-800 px-5 py-0.5 rounded-xl hover:bg-slate-700" 
-                        type="button" 
-                        onClick={() => {
-                            loadStatistics();
-                        }}
-                    >
-                        View Statistics
-                    </button>
-                </div>
+            <div className="mt-4 h-60 overflow-y-auto  scrollbar pr-2">
                 
                 {
                     statsResponseData != null && (
-                        <div className="space-y-5">
+                        <div className="space-y-5 ">
                             <h2 className="text-xl font-bold">
                                 Market Statistics
                             </h2>

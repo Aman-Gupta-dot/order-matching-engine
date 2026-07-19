@@ -173,5 +173,19 @@ int Exchange::performStressTest(int randomOrders,Exchange *exchange){
     return result;
 }
 
+int Exchange::performStressCancellation(int randomOrders,Exchange *exchange){
+    if(randomOrders<0 || randomOrders>1000000)
+    {
+        cout<<"random orders out of range\n";
+        return 10;
+    }
+    stressTest tester;
+    tester.doStressCancellationTest(randomOrders,orderId,timestamp,exchange);
+    VerifyIntegrity verifier;
+    int result=verifier.checkExchange(exchange);
+
+    return result;
+}
+
 
 

@@ -3,7 +3,13 @@ import Header from "./Header.jsx";
 import OrderBook from "./OrderBook.jsx";
 import OrderForm from "./OrderForm.jsx";
 import Statistics from "./Statistics.jsx";
-import { useState } from "react";
+import Trades from "./Trades.jsx";
+import StockSelector from "./stockSelector.jsx";
+import StressTestSelector from "./StressTestSelector.jsx"; 
+import StressTestCancellationSelector from "./StressTestCancellationSelector.jsx";
+import CancelOrderForm from "./CancelOrderForm.jsx";
+import { useEffect, useState } from "react";
+
 function App() {
 
 
@@ -20,12 +26,23 @@ function App() {
   const[cancelOrderResponse,setCancelOrderResponse]=useState(null);
 
   const[stressResponse,setStressResponse]=useState(null);
-  const[showStressTestResult,setShowStressTestResult]=useState(null);
+  const[showStressTestResult,setShowStressTestResult]=useState(false);
+
+  const[stressCancellationResponse,setStressCancellationResponse]=useState(null);
+  const[showStressCancellationTestResult,setShowStressCancellationTestResult]=useState(false);
+
+  useEffect(()=>
+  {
+    loadData();
+    loadStatistics();
+    loadTrades();
+
+  },[selectedStock])
 
 
   async function loadData()
   {
-    const response=await fetch(`http://localhost:18000/orders/${selectedStock}`);
+    const response=await fetch(`${meta.env.VITE_API_URL}/orders/${selectedStock}`);
     const data=await response.json();
     setOrderBookData(data);
     setShowOrderBook(true);
@@ -36,7 +53,7 @@ function App() {
   {
     console.log(order);
     
-    const response=await fetch(`http://localhost:18000/placeOrder`,{
+    const response=await fetch(`${meta.env.VITE_API_URL}/placeOrder`,{
       method:"POST",
       headers:{
         "Content-Type":"application/json"
@@ -46,12 +63,14 @@ function App() {
     const data=await response.json();
     setPlaceOrderResponse(data);
     loadData();
+    loadStatistics();
+    loadTrades();
 
   }
 
   async function loadTrades()
   {
-    const response=await fetch(`http://localhost:18000/trades/${selectedStock}`);
+    const response=await fetch(`${meta.env.VITE_API_URL}/trades/${selectedStock}`);
     const data=await response.json();
     setTradeBookData(data);
     setShowTradeBook(true);
@@ -60,7 +79,7 @@ function App() {
 
   async function loadStatistics()
   {
-    const response=await fetch(`http://localhost:18000/statistics/${selectedStock}`);
+    const response=await fetch(`${meta.env.VITE_API_URL}/statistics/${selectedStock}`);
     const data=await response.json();
 
     setStatsResponseData(data);
@@ -69,7 +88,7 @@ function App() {
 
   async function cancelOrder(order)
   {
-    const response=await fetch(`http://localhost:18000/cancelOrder`,{
+    const response=await fetch(`${meta.env.VITE_API_URL}/cancelOrder`,{
       method:"POST",
       headers:{
         "Content-Type":"application/json"
@@ -78,14 +97,35 @@ function App() {
     });
     const data=await response.json();
     setCancelOrderResponse(data);
+    loadData();
+    loadStatistics();
+    loadTrades();
   }
 
   async function performStressTest(numberOfOrders)
   {
-    const response=await fetch(`http://localhost:18000/stressTest/${numberOfOrders}`);
+    const response=await fetch(`${meta.env.VITE_API_URL}/stressTest/${numberOfOrders}`);
     const data=await response.json();
+    loadTrades();
     setStressResponse(data);
-    setShowStressTestResult(true);
+    setShowStressTestResult(!showStressTestResult);
+    loadData();
+    loadStatistics();
+    loadTrades();
+
+
+  }
+
+  async function performStressCancellationTest(numberOfOrders)
+  {
+    const response=await fetch(`${meta.env.VITE_API_URL}/stressCancellationTest/${numberOfOrders}`);
+    const data=await response.json();
+    loadStatistics();
+    setStressCancellationResponse(data);
+    setShowStressCancellationTestResult(!showStressTestResult);
+    loadData();
+    loadStatistics();
+    loadTrades();
 
 
   }
@@ -93,7 +133,12 @@ function App() {
     <>
         <div className="min-h-screen bg-[#0B061B]">
           <Header />
-            <div className="grid grid-cols-3 gap-2 p-4 mx-2 my-2">
+            <div>
+              <Card>
+                <StockSelector selectedStock={selectedStock} setSelectedStock={setSelectedStock}/>
+              </Card>
+            </div>
+            <div className="grid grid-cols-3 gap-2 p-4 mx-2 my-2 ">
               <Card>
                 <h1 className="place-self-center text-2xl absolute">Order Entry</h1>
                 
@@ -112,14 +157,22 @@ function App() {
             <div className="grid grid-cols-2 gap-2 p-4 mx-2 my-2">
               <Card>
                 <h1 className="place-self-center text-2xl">Recent Trades</h1>
+                <Trades showTradeBook={showTradeBook} tradeBookData={tradeBookData} loadTrades={loadTrades}/>
               </Card>
-              <Card>
-                  <h1 className="place-self-center text-2xl">Market Simulator</h1>
-              </Card>
-            </div>
-            <div className="p-4 mx-2 my-2 ">
               <Card>
                     <h1 className="place-self-center text-2xl">Cancel Order</h1>
+                    <CancelOrderForm selectedStock={selectedStock} cancelOrderResponse={cancelOrderResponse} cancelOrder={cancelOrder}/>
+              </Card>
+              
+            </div>
+            <div className=" grid grid-cols-2 gap-2 p-4 mx-2 my-2 ">
+              <Card>
+                  <h1 className="place-self-center text-2xl">Market Simulator</h1>
+                  <StressTestSelector performStressTest={performStressTest} stressResponse={stressResponse} showStressTestResult={showStressTestResult} tradeBookData={tradeBookData}/>
+              </Card>
+              <Card>
+                  <h1 className="place-self-center text-2xl">Market Simulator with Cancellations</h1>
+                  <StressTestCancellationSelector performStressCancellationTest={performStressCancellationTest} stressCancellationResponse={stressCancellationResponse} showStressCancellationTestResult={showStressCancellationTestResult} statsResponseData={statsResponseData}/>
               </Card>
              
             </div>

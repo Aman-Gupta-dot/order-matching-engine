@@ -15,7 +15,7 @@ OrderBook::OrderBook(string name)//OrderBook:: this means this constructor belon
 vector<Trade> OrderBook::placeOrder(Order o)//one order may generate 0,1 or many orders at one
 {
     vector<Trade>executedTrades;//ans to return for current buy order that came
-        if(o.price<=0 || o.quantity<0)return {};
+        if(o.type!=OrderType::MARKET && (o.price<=0 || o.quantity<0))return {};
    
         if(o.side==BuyOrSell::BUY)
             {

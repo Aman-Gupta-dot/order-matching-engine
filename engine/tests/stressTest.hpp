@@ -5,7 +5,7 @@ class stressTest{
 
         
         void doStressTest(int randomOrders,int &overallOrderId,int &overalltimeStamp,Exchange *exchange);
-        void stressCancellationTest(int randomOrders,int &overallOrderId,int &overalltimeStamp,Exchange *exchange);
+        void doStressCancellationTest(int randomOrders,int &overallOrderId,int &overalltimeStamp,Exchange *exchange);
 
 
 

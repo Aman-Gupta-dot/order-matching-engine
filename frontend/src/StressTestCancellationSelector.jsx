@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function StressTestSelector({performStressTest,stressResponse,showStressTestResult,tradeBookData})
+function StressTestCancellationSelector({performStressCancellationTest,stressCancellationResponse,showStressTestResult,statsResponseData})
 {
     const [randomOrders,setRandomOrders]=useState(100);
     const[needRandomCancellations,setNeedRandomCancellations]=useState(false);
@@ -23,9 +23,9 @@ function StressTestSelector({performStressTest,stressResponse,showStressTestResu
         
              <button className="flex items-center justify-center gap-2 border border-slate-800 px-5 py-0.5 rounded-xl hover:bg-slate-700" type="button" onClick={()=>
                                     { 
-                                        performStressTest(randomOrders);
+                                        performStressCancellationTest(randomOrders);
                                     }}>
-                                    Do Stress Test
+                                    Do Stress Cancellation Test
                                     </button>
 
             
@@ -36,7 +36,7 @@ function StressTestSelector({performStressTest,stressResponse,showStressTestResu
                                 Simulator Result
                             </h2>
                             
-                            {stressResponse!=null && <div>
+                            {stressCancellationResponse!=null && <div>
 
                                 <div className="flex justify-between">
                                     <span>Orders Generated:</span>
@@ -46,27 +46,27 @@ function StressTestSelector({performStressTest,stressResponse,showStressTestResu
 
                                 <div className="flex justify-between">
                                     <span>Duration:</span>
-                                    <span>{stressResponse.duration/1000}ms</span>
+                                    <span>{stressCancellationResponse.duration/1000}ms</span>
                                 </div>
 
                                 <div className="flex justify-between">
-                                    <span>Total Trades:</span>
-                                    {tradeBookData!=null && <span>{tradeBookData.totalTrades}</span>}
+                                    <span>Orders Cancelled</span>
+                                    <span>{statsResponseData.ordersCancelled}</span>
                                 </div>
 
                                 <div className="flex justify-between">
                                     <span>Throughput:</span>
-                                    <span>{randomOrders*1000000/stressResponse.duration} orders/sec</span>
+                                    <span>{randomOrders*1000000/stressCancellationResponse.duration} orders/sec</span>
                                 </div>
 
                                 <div className="flex justify-between">
                                     <span>Integrity Status:</span>
-                                    <span>{stressResponse.IntegrityStatus}</span>
+                                    <span>{stressCancellationResponse.IntegrityStatus}</span>
                                 </div>
 
                                 <div className="flex justify-between">
                                     <span>msg:</span>
-                                    <span>{stressResponse.msg}</span>
+                                    <span>{stressCancellationResponse.msg}</span>
                                 </div>
                                 
                             </div>}
@@ -75,4 +75,4 @@ function StressTestSelector({performStressTest,stressResponse,showStressTestResu
         </>
     )
 }
-export default StressTestSelector;
+export default StressTestCancellationSelector;

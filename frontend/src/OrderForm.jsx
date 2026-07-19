@@ -116,10 +116,6 @@ function OrderForm({placeOrder,selectedStock,placeOrderResponse}){
                             </button>
                     
                 </form>
-
-                        <pre>
-
-                        </pre>
                 
                 
             </div>

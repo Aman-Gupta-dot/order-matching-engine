@@ -26,5 +26,6 @@ class Exchange{
         StatisticsBook getStatisticsBook(string &stockName)const;
 
         int performStressTest(int randomOrders,Exchange *exchange);
+        int performStressCancellation(int randomOrders,Exchange *exchange);
         
 };

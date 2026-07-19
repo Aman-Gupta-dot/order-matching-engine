@@ -18,13 +18,13 @@ function App() {
   return (
     <>
       <Header />
-      <StockSelector selectedStock={selectedStock} setSelectedStock={setSelectedStock}/>
       
-      <CancelOrderForm selectedStock={selectedStock} cancelOrderResponse={cancelOrderResponse} cancelOrder={cancelOrder}/>
       
-      <Trades showTradeBook={showTradeBook} tradeBookData={tradeBookData} loadTrades={loadTrades}/>
       
-      <StressTestSelector performStressTest={performStressTest} stressResponse={stressResponse} showStressTestResult={showStressTestResult}/>
+      
+      
+      
+      
     </>
   )
 }
