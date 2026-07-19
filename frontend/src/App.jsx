@@ -39,10 +39,11 @@ function App() {
 
   },[selectedStock])
 
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   async function loadData()
   {
-    const response=await fetch(`${meta.env.VITE_API_URL}/orders/${selectedStock}`);
+    const response=await fetch(`${BASE_URL}/orders/${selectedStock}`);
     const data=await response.json();
     setOrderBookData(data);
     setShowOrderBook(true);
@@ -53,7 +54,7 @@ function App() {
   {
     console.log(order);
     
-    const response=await fetch(`${meta.env.VITE_API_URL}/placeOrder`,{
+    const response=await fetch(`${BASE_URL}/placeOrder`,{
       method:"POST",
       headers:{
         "Content-Type":"application/json"
@@ -70,7 +71,7 @@ function App() {
 
   async function loadTrades()
   {
-    const response=await fetch(`${meta.env.VITE_API_URL}/trades/${selectedStock}`);
+    const response=await fetch(`${BASE_URL}/trades/${selectedStock}`);
     const data=await response.json();
     setTradeBookData(data);
     setShowTradeBook(true);
@@ -79,7 +80,7 @@ function App() {
 
   async function loadStatistics()
   {
-    const response=await fetch(`${meta.env.VITE_API_URL}/statistics/${selectedStock}`);
+    const response=await fetch(`${BASE_URL}/statistics/${selectedStock}`);
     const data=await response.json();
 
     setStatsResponseData(data);
@@ -88,7 +89,7 @@ function App() {
 
   async function cancelOrder(order)
   {
-    const response=await fetch(`${meta.env.VITE_API_URL}/cancelOrder`,{
+    const response=await fetch(`${BASE_URL}/cancelOrder`,{
       method:"POST",
       headers:{
         "Content-Type":"application/json"
@@ -104,7 +105,7 @@ function App() {
 
   async function performStressTest(numberOfOrders)
   {
-    const response=await fetch(`${meta.env.VITE_API_URL}/stressTest/${numberOfOrders}`);
+    const response=await fetch(`${BASE_URL}/stressTest/${numberOfOrders}`);
     const data=await response.json();
     loadTrades();
     setStressResponse(data);
@@ -118,7 +119,7 @@ function App() {
 
   async function performStressCancellationTest(numberOfOrders)
   {
-    const response=await fetch(`${meta.env.VITE_API_URL}/stressCancellationTest/${numberOfOrders}`);
+    const response=await fetch(`${BASE_URL}/stressCancellationTest/${numberOfOrders}`);
     const data=await response.json();
     loadStatistics();
     setStressCancellationResponse(data);
