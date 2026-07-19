@@ -4,7 +4,7 @@ import OrderBook from "./OrderBook.jsx";
 import OrderForm from "./OrderForm.jsx";
 import Statistics from "./Statistics.jsx";
 import Trades from "./Trades.jsx";
-import StockSelector from "./stockSelector.jsx";
+import StockSelector from "./StockSelector.jsx";
 import StressTestSelector from "./StressTestSelector.jsx"; 
 import StressTestCancellationSelector from "./StressTestCancellationSelector.jsx";
 import CancelOrderForm from "./CancelOrderForm.jsx";
